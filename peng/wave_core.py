@@ -1,7 +1,7 @@
 ﻿# wave_core.py
 # Copyright (c) 2013-2016 Pablo Acosta-Serafini
 # See LICENSE for details
-# pylint: disable=C0111,C0302,E0611,R0912,R0915,W0105
+# pylint: disable=C0111,C0302,E0611,R0912,R0915,W0105,W0611
 
 # Standard library imports
 import collections
@@ -10,9 +10,19 @@ import copy
 import numpy
 import pexdoc.exh
 import pexdoc.pcontracts
+from pexdoc.ptypes import (
+    non_null_string,
+)
 import scipy.interpolate
 # Intra-package imports imports
 from .functions import pprint_vector, remove_extra_delims
+from .ptypes import (
+    increasing_real_numpy_vector,
+    number_numpy_vector,
+    wave_scale_option,
+    wave_interp_option,
+    wave_vectors,
+)
 from .constants import FP_ATOL, FP_RTOL
 
 
@@ -188,8 +198,8 @@ class Waveform(object):
     :param dep_vector: Dependent variable vector
     :type  dep_vector: :ref:`NumberNumpyVector`
 
-    :param  indep_name: Independent variable name
-    :type   indep_name: `NonNullString <http://pexdoc.readthedocs.io/en/stable/
+    :param  dep_name: Independent variable name
+    :type   dep_name: `NonNullString <http://pexdoc.readthedocs.io/en/stable/
                         ptypes.html#nonnullstring>`_
 
     :param  indep_scale: Independent variable scale
@@ -215,13 +225,13 @@ class Waveform(object):
     .. peng.wave_core.Waveform.__init__
 
     :raises:
+     * RuntimeError (Argument \`dep_name\` is not valid)
+
      * RuntimeError (Argument \`dep_scale\` is not valid)
 
      * RuntimeError (Argument \`dep_units\` is not valid)
 
      * RuntimeError (Argument \`dep_vector\` is not valid)
-
-     * RuntimeError (Argument \`indep_name\` is not valid)
 
      * RuntimeError (Argument \`indep_scale\` is not valid)
 
@@ -252,14 +262,13 @@ class Waveform(object):
               dependent variable scale, independent variable units, dependent
               variable units and interpolation function.
     """
-    # pylint: disable=R0902,R0903,R0913
-    # pylint: disable=W0613
-    def __init__(self, indep_vector, dep_vector, indep_name,
+    # pylint: disable=R0902,R0903,R0913,W0613
+    def __init__(self, indep_vector, dep_vector, dep_name,
         indep_scale='LINEAR', dep_scale='LINEAR', indep_units='', dep_units='',
         interp='CONTINUOUS'):
         self._indep_vector = None
         self._dep_vector = None
-        self._indep_name = None
+        self._dep_name = None
         self._indep_scale = None
         self._dep_scale = None
         self._indep_units = None
@@ -267,7 +276,7 @@ class Waveform(object):
         self._interp = None
         self._set_indep_vector(indep_vector, check=False)
         self._set_dep_vector(dep_vector, check=True)
-        self._set_indep_name(indep_name)
+        self._set_dep_name(dep_name)
         self._set_indep_scale(indep_scale)
         self._set_dep_scale(dep_scale)
         self._set_indep_units(indep_units)
@@ -294,7 +303,7 @@ class Waveform(object):
 
         """
         obj = copy.copy(self)
-        obj.indep_name = 'abs({0})'.format(obj.indep_name)
+        obj.dep_name = 'abs({0})'.format(obj.dep_name)
         obj.dep_vector = numpy.abs(obj.dep_vector).astype(obj.dep_vector.dtype)
         return obj
 
@@ -460,7 +469,7 @@ class Waveform(object):
         return Waveform(
             indep_vector=numpy.copy(self.indep_vector),
             dep_vector=numpy.copy(self.dep_vector),
-            indep_name=copy.copy(self.indep_name),
+            dep_name=copy.copy(self.dep_name),
             indep_scale=self.indep_scale,
             dep_scale=self.dep_scale,
             indep_units=self.indep_units,
@@ -727,7 +736,7 @@ class Waveform(object):
             self._dep_vector.dtype.name.startswith('complex')
         )
         obj = copy.copy(self)
-        obj.indep_name = '~'+obj.indep_name
+        obj.dep_name = '~'+obj.dep_name
         obj.dep_vector = (
             numpy.invert(obj.dep_vector).astype(obj.dep_vector.dtype)
         )
@@ -942,7 +951,7 @@ class Waveform(object):
 
         """
         obj = copy.copy(self)
-        obj.indep_name = '-'+obj.indep_name
+        obj.dep_name = '-'+obj.dep_name
         obj.dep_vector = -1*obj.dep_vector
         return obj
 
@@ -1113,7 +1122,7 @@ class Waveform(object):
             "peng.Waveform(\
 indep_vector=array([1, 2, 3]), \
 dep_vector=array([4, 5, 6]), \
-indep_name='test', \
+dep_name='test', \
 indep_scale='LINEAR', \
 dep_scale='LINEAR', \
 indep_units='', \
@@ -1124,7 +1133,7 @@ interp='CONTINUOUS')"
             "peng.Waveform("
             "indep_vector={0}, "
             "dep_vector={1}, "
-            "indep_name={2}, "
+            "dep_name={2}, "
             "indep_scale={3}, "
             "dep_scale={4}, "
             "indep_units={5}, "
@@ -1134,7 +1143,7 @@ interp='CONTINUOUS')"
         return template.format(
             repr(self._indep_vector),
             repr(self._dep_vector),
-            repr(self._indep_name),
+            repr(self._dep_name),
             repr(self._indep_scale),
             repr(self._dep_scale),
             repr(self._indep_units),
@@ -1349,7 +1358,7 @@ interp='CONTINUOUS')"
             Interpolating function: CONTINUOUS
         """
         ret = ''
-        ret += 'Waveform: {0}\n'.format(self._indep_name)
+        ret += 'Waveform: {0}\n'.format(self._dep_name)
         ret += 'Independent variable: '+pprint_vector(
             vector=self._indep_vector,
             width=80-22,
@@ -1511,7 +1520,7 @@ interp='CONTINUOUS')"
             other = Waveform(
                 indep_vector=self._indep_vector,
                 dep_vector=dep_vector,
-                indep_name=str(other),
+                dep_name=str(other),
                 indep_scale=self._indep_scale,
                 dep_scale=self._dep_scale,
                 indep_units=self._indep_units,
@@ -1589,7 +1598,7 @@ interp='CONTINUOUS')"
             if proc_units and scalar and (not ureflected):
                 dep_units = '({0})**({1})'.format(
                     self._dep_units,
-                    scalar_value if scalar_value else other._indep_name
+                    scalar_value if scalar_value else other._dep_name
                 )
             elif proc_units and scalar:
                 dep_units = '1**({0})'.format(
@@ -1630,8 +1639,8 @@ interp='CONTINUOUS')"
                 dep_vector_a if not reflected else dep_vector_b,
                 dep_vector_b if not reflected else dep_vector_a,
             )
-        indep_name = '({wave1}){op}({wave2})'.format(
-            wave1=self.indep_name, wave2=other.indep_name, op=operand)
+        dep_name = '({wave1}){op}({wave2})'.format(
+            wave1=self.dep_name, wave2=other.dep_name, op=operand)
         if proc_units and (operand in ['/', '//']):
             alt_operand = '/'
             if scalar and (not ureflected):
@@ -1650,7 +1659,7 @@ interp='CONTINUOUS')"
         return Waveform(
             indep_vector=indep_vector,
             dep_vector=dep_vector,
-            indep_name=remove_extra_delims(indep_name, '(', ')'),
+            dep_name=remove_extra_delims(dep_name, '(', ')'),
             indep_scale=self._indep_scale,
             dep_scale=self._dep_scale,
             indep_units=self._indep_units,
@@ -1667,8 +1676,8 @@ interp='CONTINUOUS')"
     def _get_dep_vector(self):
         return self._dep_vector
 
-    def _get_indep_name(self):
-        return self._indep_name
+    def _get_dep_name(self):
+        return self._dep_name
 
     def _get_indep_scale(self):
         return self._indep_scale
@@ -1707,9 +1716,9 @@ interp='CONTINUOUS')"
     def _set_dep_vector(self, dep_vector, check=True):
         self._set_vectors_int(dep_vector=dep_vector, check=check)
 
-    @pexdoc.pcontracts.contract(indep_name='non_null_string')
-    def _set_indep_name(self, indep_name):
-        self._indep_name = indep_name
+    @pexdoc.pcontracts.contract(dep_name='non_null_string')
+    def _set_dep_name(self, dep_name):
+        self._dep_name = dep_name
 
     @pexdoc.pcontracts.contract(indep_scale='wave_scale_option')
     def _set_indep_scale(self, indep_scale):
@@ -1824,8 +1833,8 @@ interp='CONTINUOUS')"
     .. [[[end]]]
     """
 
-    indep_name = property(
-        _get_indep_name, _set_indep_name, doc='Independent variable name'
+    dep_name = property(
+        _get_dep_name, _set_dep_name, doc='Independent variable name'
     )
     r"""
     Gets or sets the waveform independent variable name

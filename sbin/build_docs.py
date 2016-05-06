@@ -2,7 +2,7 @@
 # build_docs.py
 # Copyright (c) 2013-2016 Pablo Acosta-Serafini
 # See LICENSE for details
-# pylint: disable=C0111,F0401,R0914,W0141
+# pylint: disable=C0111,F0401,R0914,R0915,W0141
 
 # Standard library imports
 from __future__ import print_function
@@ -36,7 +36,7 @@ VALID_MODULES = ['peng']
 ###
 def build_pkg_docs(args):
     """ Build documentation """
-    # pylint: disable=R0912,R0915
+    # pylint: disable=R0912
     debug = False
     retcode = 0
     pkg_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -354,30 +354,49 @@ def generate_top_level_readme(pkg_dir):
     print('Generating top-level README.rst file')
     with open(fname, 'r') as fobj:
         lines = [item.rstrip() for item in fobj.readlines()]
-    ref_regexp = re.compile('.*:py:mod:`(.+) <peng.(.+)>`.*')
+    ref1_regexp = re.compile('.*:py:mod:`(.+) <peng.(.+)>`.*')
+    ref2_regexp = re.compile('.*:py:mod:`peng.(.+)`.*')
+    ref3_regexp = re.compile(r'.*:ref:`(.+?)(\s+<.+>)*`.*')
     rst_cmd_regexp = re.compile('^\\s*.. \\S+::.*')
     indent_regexp = re.compile('^(\\s*)\\S+')
     ret = []
     autofunction = False
     for line in lines:
-        match = ref_regexp.match(line)
+        match1 = ref1_regexp.match(line)
+        match2 = ref2_regexp.match(line)
+        match3 = ref3_regexp.match(line)
         if autofunction:
             match = indent_regexp.match(line)
             if (not match) or (match and len(match.group(1)) == 0):
                 autofunction = False
                 ret.append(line)
-        elif 'doctest' in line:
-            line = line.replace('doctest::', 'code-block:: python')
-            ret.append(line)
-        elif match:
+        elif match1:
             # Remove cross-references
-            label = match.group(1)
-            mname = match.group(2)
+            label = match1.group(1)
+            mname = match1.group(2)
             line = line.replace(
                 ':py:mod:`{label} <peng.{mname}>`'.format(
                     label=label, mname=mname
                 ),
                 label
+            )
+            ret.append(line)
+        elif match2:
+            # Remove cross-references
+            mname = match2.group(1)
+            line = line.replace(
+                ':py:mod:`peng.{mname}`'.format(mname=mname), mname
+            )
+            ret.append(line)
+        elif match3:
+            # Remove cross-references
+            mname = match3.group(1)
+            target = match3.group(2)
+            line = line.replace(
+                ':ref:`{mname}{target}`'.format(
+                    mname=mname,
+                    target='' if target is None else target
+                ), mname
             )
             ret.append(line)
         elif line.lstrip().startswith('.. include::'):
@@ -406,7 +425,7 @@ def generate_top_level_readme(pkg_dir):
         fobj.write('\n'.join(ret))
     # Check that generated file produces HTML version without errors
     sbin.functions.shcmd(
-        ['rst2html.py', '--exit-status=3', fname],
+        ['rst2html.py', '--exit-status=3', '-v', fname],
         'Error validating top-level README.rst HTML conversion',
     )
 

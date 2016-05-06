@@ -5,3 +5,5 @@ pytest>=2.7.0
 six>=1.4.0
 sphinx>=1.2.3
 sphinxcontrib-inlinesyntaxhighlight>=0.2
+pmisc>=1.0.0
+pexdoc>=1.0.0

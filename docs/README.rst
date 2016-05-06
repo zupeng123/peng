@@ -83,7 +83,38 @@ Description
 .. _Virtualenv: http://docs.python-guide.org/en/latest/dev/virtualenvs
 .. [[[end]]]
 
-This package provides engineering-related functions, including:
+This package provides engineering-related classes and functions, including:
+
+* A waveform :ref:`class <WaveformClass>` that is a first-class object. For example:
+
+    .. code-block:: python
+
+        >>> import copy, numpy, peng
+        >>> obj_a=peng.Waveform(
+        ...     indep_vector=numpy.array([1, 2, 3]),
+        ...     dep_vector=numpy.array([10, 20, 30]),
+        ...     dep_name='obj_a'
+        ... )
+        >>> obj_b = obj_a*2
+        >>> print(obj_b)
+        Waveform: obj_a*2
+        Independent variable: [ 1, 2, 3 ]
+        Dependent variable: [ 20, 40, 60 ]
+        Independent variable scale: LINEAR
+        Dependent variable scale: LINEAR
+        Independent variable units: (None)
+        Dependent variable units: (None)
+        Interpolating function: CONTINUOUS
+        >>> obj_c = copy.copy(obj_b)
+        >>> obj_a == obj_b
+        False
+        >>> obj_b == obj_c
+        True
+
+  Numerous :ref:`functions <WaveformFunctions>` are provided (trigonometric,
+  calculus, transforms, etc.) and creating new functions that operate on
+  waveforms is simple since all of their relevant information can be accessed
+  through properties
 
 * Handling numbers represented in engineering notation, obtaining
   their constituent components and converting to and from regular
@@ -144,34 +175,6 @@ This package provides engineering-related functions, including:
         ...     sign_always=True
         ... )
         '+1.0E+02'
-
-The classes include:
-
-* A waveform class that is a first-class object. For example:
-
-    .. doctest::
-
-        >>> import copy, numpy, peng
-        >>> obj_a=peng.Waveform(
-        ...     indep_vector=numpy.array([1, 2, 3]),
-        ...     dep_vector=numpy.array([10, 20, 30]),
-        ...     indep_name='obj_a'
-        ... )
-        >>> obj_b = obj_a*2
-        >>> print(obj_b)
-        Waveform: obj_a*2
-        Independent variable: [ 1, 2, 3 ]
-        Dependent variable: [ 20, 40, 60 ]
-        Independent variable scale: LINEAR
-        Dependent variable scale: LINEAR
-        Independent variable units: (None)
-        Dependent variable units: (None)
-        Interpolating function: CONTINUOUS
-        >>> obj_c = copy.copy(obj_b)
-        >>> obj_a == obj_b
-        False
-        >>> obj_b == obj_c
-        True
 
 Interpreter
 ===========

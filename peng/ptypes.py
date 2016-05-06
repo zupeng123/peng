@@ -68,7 +68,8 @@ def _check_real_numpy_vector(obj):
 @pexdoc.pcontracts.new_contract()
 def engineering_notation_number(obj):
     r"""
-    Validates if an object is an EngineeringNotationNumber pseudo-type object
+    Validates if an object is an :ref:`EngineeringNotationNumber` pseudo-type
+    object
 
     :param obj: Object
     :type  obj: any
@@ -93,7 +94,8 @@ def engineering_notation_number(obj):
 @pexdoc.pcontracts.new_contract()
 def engineering_notation_suffix(obj):
     r"""
-    Validates if an object is an EngineeringNotationSuffix pseudo-type object
+    Validates if an object is an :ref:`EngineeringNotationSuffix` pseudo-type
+    object
 
     :param obj: Object
     :type  obj: any
@@ -113,7 +115,8 @@ def engineering_notation_suffix(obj):
 @pexdoc.pcontracts.new_contract()
 def increasing_real_numpy_vector(obj):
     r"""
-    Validates if an object is IncreasingRealNumpyVector pseudo-type object
+    Validates if an object is :ref:`IncreasingRealNumpyVector` pseudo-type
+    object
 
     :param obj: Object
     :type  obj: any
@@ -131,7 +134,7 @@ def increasing_real_numpy_vector(obj):
 @pexdoc.pcontracts.new_contract()
 def number_numpy_vector(obj):
     r"""
-    Validates if an object is a NumberNumpyVector pseudo-type object
+    Validates if an object is a :ref:`NumberNumpyVector` pseudo-type object
 
     :param obj: Object
     :type  obj: any
@@ -147,9 +150,27 @@ def number_numpy_vector(obj):
 
 
 @pexdoc.pcontracts.new_contract()
+def real_numpy_vector(obj):
+    r"""
+    Validates if an object is a :ref:`RealNumpyVector` pseudo-type object
+
+    :param obj: Object
+    :type  obj: any
+
+    :raises: RuntimeError (Argument \`*[argument_name]*\` is not valid). The
+     token \*[argument_name]\* is replaced by the name of the argument the
+     contract is attached to
+
+    :rtype: None
+    """
+    if _check_real_numpy_vector(obj):
+        raise ValueError(pexdoc.pcontracts.get_exdesc())
+
+
+@pexdoc.pcontracts.new_contract()
 def touchstone_data(obj):
     r"""
-    Validates if an object is an TouchstoneData pseudo-type object
+    Validates if an object is an :ref:`TouchstoneData` pseudo-type object
 
     :param obj: Object
     :type  obj: any
@@ -161,21 +182,21 @@ def touchstone_data(obj):
     :rtype: None
     """
     if ((not isinstance(obj, dict)) or (isinstance(obj, dict) and
-       (sorted(obj.keys()) != sorted(['points', 'freq', 'data'])))):
+       (sorted(obj.keys()) != sorted(['points', 'freq', 'pars'])))):
         raise ValueError(pexdoc.pcontracts.get_exdesc())
     if not (isinstance(obj['points'], int) and (obj['points'] > 0)):
         raise ValueError(pexdoc.pcontracts.get_exdesc())
     if _check_increasing_real_numpy_vector(obj['freq']):
         raise ValueError(pexdoc.pcontracts.get_exdesc())
-    if not isinstance(obj['data'], numpy.ndarray):
+    if not isinstance(obj['pars'], numpy.ndarray):
         raise ValueError(pexdoc.pcontracts.get_exdesc())
     vdata = ['int', 'float', 'complex']
-    if not any([obj['data'].dtype.name.startswith(item) for item in vdata]):
+    if not any([obj['pars'].dtype.name.startswith(item) for item in vdata]):
         raise ValueError(pexdoc.pcontracts.get_exdesc())
     if obj['freq'].size != obj['points']:
         raise ValueError(pexdoc.pcontracts.get_exdesc())
-    nports = int(math.sqrt(obj['data'].size/obj['freq'].size))
-    if obj['points']*(nports**2) != obj['data'].size:
+    nports = int(math.sqrt(obj['pars'].size/obj['freq'].size))
+    if obj['points']*(nports**2) != obj['pars'].size:
         raise ValueError(pexdoc.pcontracts.get_exdesc())
     return None
 
@@ -183,7 +204,7 @@ def touchstone_data(obj):
 @pexdoc.pcontracts.new_contract()
 def touchstone_noise_data(obj):
     r"""
-    Validates if an object is an TouchstoneNoiseData pseudo-type object
+    Validates if an object is an :ref:`TouchstoneNoiseData` pseudo-type object
 
     :param obj: Object
     :type  obj: any
@@ -220,7 +241,7 @@ def touchstone_noise_data(obj):
 @pexdoc.pcontracts.new_contract()
 def touchstone_options(obj):
     r"""
-    Validates if an object is an TouchstoneOptions pseudo-type object
+    Validates if an object is an :ref:`TouchstoneOptions` pseudo-type object
 
     :param obj: Object
     :type  obj: any
@@ -245,7 +266,7 @@ def touchstone_options(obj):
 @pexdoc.pcontracts.new_contract()
 def wave_interp_option(obj):
     r"""
-    Validates if an object is a WaveInterpOption pseudo-type object
+    Validates if an object is a :ref:`WaveInterpOption` pseudo-type object
 
     :param obj: Object
     :type  obj: any
@@ -267,7 +288,7 @@ def wave_interp_option(obj):
 @pexdoc.pcontracts.new_contract()
 def wave_scale_option(obj):
     r"""
-    Validates if an object is a WaveScaleOption pseudo-type object
+    Validates if an object is a :ref:`WaveScaleOption` pseudo-type object
 
     :param obj: Object
     :type  obj: any
@@ -289,7 +310,7 @@ def wave_scale_option(obj):
 @pexdoc.pcontracts.new_contract()
 def wave_vectors(obj):
     r"""
-    Validates if an object is a WaveVectors pseudo-type object
+    Validates if an object is a :ref:`WaveVectors` pseudo-type object
 
     :param obj: Object
     :type  obj: any

@@ -1,10 +1,11 @@
 # wave_functions.py
 # Copyright (c) 2013-2016 Pablo Acosta-Serafini
 # See LICENSE for details
-# pylint: disable=C0103,C0111,W0212
+# pylint: disable=C0103,C0111,E1101,R0913,W0212
 
 # Standard library imports
 import copy
+import math
 # PyPI imports
 import numpy
 import pexdoc.exh
@@ -37,6 +38,16 @@ exobj_eng = trace_ex_eng_wave_functions.trace_module(no_print=True)
 ###
 # Functions
 ###
+def _barange(bmin, bmax, inc):
+    vector = numpy.arange(bmin, bmax+inc, inc)
+    vector = (
+        vector
+        if numpy.isclose(bmax, vector[-1], FP_RTOL, FP_ATOL) else
+        vector[:-1]
+    )
+    return vector
+
+
 def _bound_waveform(wave, indep_min, indep_max):
     """ Add independent variable vector bounds if they are not in vector """
     indep_min, indep_max = _validate_min_max(wave, indep_min, indep_max)
@@ -76,7 +87,7 @@ def _operation(wave, desc, units, fpointer):
     """ Generic operation on a waveform object """
     ret = copy.copy(wave)
     ret.dep_units = units
-    ret.indep_name = '{0}({1})'.format(desc, ret.indep_name)
+    ret.dep_name = '{0}({1})'.format(desc, ret.dep_name)
     ret._dep_vector = fpointer(ret._dep_vector)
     return ret
 
@@ -334,7 +345,7 @@ def average(wave, indep_min=None, indep_max=None):
     deltas = ret._indep_vector-ret._indep_vector[0]
     deltas[0] = 1.0
     ret._dep_vector = numpy.divide(area, deltas)
-    ret.indep_name = 'average({0})'.format(ret._indep_name)
+    ret.dep_name = 'average({0})'.format(ret._dep_name)
     return ret
 
 
@@ -421,12 +432,14 @@ def db(wave):
     .. [[[end]]]
     """
     pexdoc.exh.addex(
-        ValueError, 'Math domain error', bool((min(wave._dep_vector) <= 0))
+        ValueError,
+        'Math domain error',
+        bool((numpy.min(numpy.abs(wave._dep_vector)) <= 0))
     )
     ret = copy.copy(wave)
     ret.dep_units = 'dB'
-    ret.indep_name = 'db({0})'.format(ret.indep_name)
-    ret._dep_vector = 20.0*numpy.log10(ret._dep_vector)
+    ret.dep_name = 'db({0})'.format(ret.dep_name)
+    ret._dep_vector = 20.0*numpy.log10(numpy.abs(ret._dep_vector))
     return ret
 
 
@@ -478,7 +491,7 @@ def derivative(wave, indep_min=None, indep_max=None):
         (numpy.array([delta_dep[0]]), delta_dep)
     )
     ret._dep_vector = numpy.divide(delta_dep, delta_indep)
-    ret.indep_name = 'derivative({0})'.format(ret._indep_name)
+    ret.dep_name = 'derivative({0})'.format(ret._dep_name)
     ret.dep_units = _build_units(ret.indep_units, ret.dep_units, '/')
     return ret
 
@@ -504,9 +517,345 @@ def exp(wave):
 
 
 @pexdoc.pcontracts.contract(
-    wave=Waveform, dep_var='number', der='int,>=-1,<=+1', inst='int,>0',
-    indep_min='None|number', indep_max='None|number')
-def find(wave, dep_var, der=0, inst=1, indep_min=None, indep_max=None):
+    wave=Waveform, npoints='None|(int,>=1)',
+    indep_min='None|number', indep_max='None|number'
+)
+def fft(wave, npoints=None, indep_min=None, indep_max=None):
+    r"""
+    Returns the Fast Fourier Transform of a waveform
+
+    :param wave: Waveform
+    :type  wave: :py:class:`peng.eng.Waveform`
+
+    :param npoints: Number of points to use in the transform. If **npoints**
+                    is less than the size of the independent variable vector
+                    the waveform is truncated; if **npoints** is greater than
+                    the size of the independent variable vector, the waveform
+                    is zero-padded
+    :type  npoints: positive integer
+
+    :param indep_min: Independent vector start point of computation
+    :type  indep_min: integer or float
+
+    :param indep_max: Independent vector stop point of computation
+    :type  indep_max: integer or float
+
+    :rtype: :py:class:`peng.eng.Waveform`
+
+    .. [[[cog cog.out(exobj_eng.get_sphinx_autodoc(raised=True)) ]]]
+    .. Auto-generated exceptions documentation for peng.wave_functions.fft
+
+    :raises:
+     * RuntimeError (Argument \`indep_max\` is not valid)
+
+     * RuntimeError (Argument \`indep_min\` is not valid)
+
+     * RuntimeError (Argument \`npoints\` is not valid)
+
+     * RuntimeError (Argument \`wave\` is not valid)
+
+     * RuntimeError (Incongruent \`indep_min\` and \`indep_max\`
+       arguments)
+
+     * RuntimeError (Non-uniform sampling)
+
+    .. [[[end]]]
+    """
+    ret = copy.copy(wave)
+    _bound_waveform(ret, indep_min, indep_max)
+    npoints = npoints or ret._indep_vector.size
+    fs = (npoints-1)/float(ret._indep_vector[-1])
+    spoints = min(ret._indep_vector.size, npoints)
+    sdiff = numpy.diff(ret._indep_vector[:spoints])
+    cond = not numpy.all(
+        numpy.isclose(
+            sdiff, sdiff[0]*numpy.ones(spoints-1), FP_RTOL, FP_ATOL
+        )
+    )
+    pexdoc.addex(RuntimeError, 'Non-uniform sampling', cond)
+    finc = fs/float(npoints-1)
+    indep_vector = _barange(-fs/2.0, +fs/2.0, finc)
+    dep_vector = numpy.fft.fft(ret._dep_vector, npoints)
+    return Waveform(
+        indep_vector=indep_vector,
+        dep_vector=dep_vector,
+        dep_name='fft({0})'.format(ret.dep_name),
+        indep_scale='LINEAR',
+        dep_scale='LINEAR',
+        indep_units='Hz',
+        dep_units=''
+    )
+
+
+@pexdoc.pcontracts.contract(
+    wave=Waveform, npoints='None|(int,>=1)',
+    indep_min='None|number', indep_max='None|number'
+)
+def fftdb(wave, npoints=None, indep_min=None, indep_max=None):
+    r"""
+    Returns the Fast Fourier Transform of a waveform with the dependent
+    variable vector expressed in decibels
+
+    :param wave: Waveform
+    :type  wave: :py:class:`peng.eng.Waveform`
+
+    :param npoints: Number of points to use in the transform. If **npoints**
+                    is less than the size of the independent variable vector
+                    the waveform is truncated; if **npoints** is greater than
+                    the size of the independent variable vector, the waveform
+                    is zero-padded
+    :type  npoints: positive integer
+
+    :param indep_min: Independent vector start point of computation
+    :type  indep_min: integer or float
+
+    :param indep_max: Independent vector stop point of computation
+    :type  indep_max: integer or float
+
+    :rtype: :py:class:`peng.eng.Waveform`
+
+    .. [[[cog cog.out(exobj_eng.get_sphinx_autodoc(raised=True)) ]]]
+    .. Auto-generated exceptions documentation for
+    .. peng.wave_functions.fftdb
+
+    :raises:
+     * RuntimeError (Argument \`indep_max\` is not valid)
+
+     * RuntimeError (Argument \`indep_min\` is not valid)
+
+     * RuntimeError (Argument \`npoints\` is not valid)
+
+     * RuntimeError (Argument \`wave\` is not valid)
+
+     * RuntimeError (Incongruent \`indep_min\` and \`indep_max\`
+       arguments)
+
+     * RuntimeError (Non-uniform sampling)
+
+    .. [[[end]]]
+    """
+    return db(fft(wave, npoints, indep_min, indep_max))
+
+
+@pexdoc.pcontracts.contract(
+    wave=Waveform, npoints='None|(int,>=1)',
+    indep_min='None|number', indep_max='None|number'
+)
+def ffti(wave, npoints=None, indep_min=None, indep_max=None):
+    r"""
+    Returns the imaginary part of the Fast Fourier Transform of a waveform
+
+    :param wave: Waveform
+    :type  wave: :py:class:`peng.eng.Waveform`
+
+    :param npoints: Number of points to use in the transform. If **npoints**
+                    is less than the size of the independent variable vector
+                    the waveform is truncated; if **npoints** is greater than
+                    the size of the independent variable vector, the waveform
+                    is zero-padded
+    :type  npoints: positive integer
+
+    :param indep_min: Independent vector start point of computation
+    :type  indep_min: integer or float
+
+    :param indep_max: Independent vector stop point of computation
+    :type  indep_max: integer or float
+
+    :rtype: :py:class:`peng.eng.Waveform`
+
+    .. [[[cog cog.out(exobj_eng.get_sphinx_autodoc(raised=True)) ]]]
+    .. Auto-generated exceptions documentation for
+    .. peng.wave_functions.ffti
+
+    :raises:
+     * RuntimeError (Argument \`indep_max\` is not valid)
+
+     * RuntimeError (Argument \`indep_min\` is not valid)
+
+     * RuntimeError (Argument \`npoints\` is not valid)
+
+     * RuntimeError (Argument \`wave\` is not valid)
+
+     * RuntimeError (Incongruent \`indep_min\` and \`indep_max\`
+       arguments)
+
+     * RuntimeError (Non-uniform sampling)
+
+    .. [[[end]]]
+    """
+    return imag(fft(wave, npoints, indep_min, indep_max))
+
+
+@pexdoc.pcontracts.contract(
+    wave=Waveform, npoints='None|(int,>=1)',
+    indep_min='None|number', indep_max='None|number'
+)
+def fftm(wave, npoints=None, indep_min=None, indep_max=None):
+    r"""
+    Returns the magnitude of the Fast Fourier Transform of a waveform
+
+    :param wave: Waveform
+    :type  wave: :py:class:`peng.eng.Waveform`
+
+    :param npoints: Number of points to use in the transform. If **npoints**
+                    is less than the size of the independent variable vector
+                    the waveform is truncated; if **npoints** is greater than
+                    the size of the independent variable vector, the waveform
+                    is zero-padded
+    :type  npoints: positive integer
+
+    :param indep_min: Independent vector start point of computation
+    :type  indep_min: integer or float
+
+    :param indep_max: Independent vector stop point of computation
+    :type  indep_max: integer or float
+
+    :rtype: :py:class:`peng.eng.Waveform`
+
+    .. [[[cog cog.out(exobj_eng.get_sphinx_autodoc(raised=True)) ]]]
+    .. Auto-generated exceptions documentation for
+    .. peng.wave_functions.fftm
+
+    :raises:
+     * RuntimeError (Argument \`indep_max\` is not valid)
+
+     * RuntimeError (Argument \`indep_min\` is not valid)
+
+     * RuntimeError (Argument \`npoints\` is not valid)
+
+     * RuntimeError (Argument \`wave\` is not valid)
+
+     * RuntimeError (Incongruent \`indep_min\` and \`indep_max\`
+       arguments)
+
+     * RuntimeError (Non-uniform sampling)
+
+    .. [[[end]]]
+    """
+    return abs(fft(wave, npoints, indep_min, indep_max))
+
+
+@pexdoc.pcontracts.contract(
+    wave=Waveform, npoints='None|(int,>=1)',
+    indep_min='None|number', indep_max='None|number',
+    unwrap=bool, rad=bool
+)
+def fftp(
+        wave, npoints=None, indep_min=None, indep_max=None,
+        unwrap=True, rad=True
+):
+    r"""
+    Returns the phase of the Fast Fourier Transform of a waveform
+
+    :param wave: Waveform
+    :type  wave: :py:class:`peng.eng.Waveform`
+
+    :param npoints: Number of points to use in the transform. If **npoints**
+                    is less than the size of the independent variable vector
+                    the waveform is truncated; if **npoints** is greater than
+                    the size of the independent variable vector, the waveform
+                    is zero-padded
+    :type  npoints: positive integer
+
+    :param indep_min: Independent vector start point of computation
+    :type  indep_min: integer or float
+
+    :param indep_max: Independent vector stop point of computation
+    :type  indep_max: integer or float
+
+    :param unwrap: Flag that indicates whether phase should change phase shifts
+                   to their :code:`2*pi` complement (True) or not (False)
+    :type  unwrap: boolean
+
+    :param rad: Flag that indicates whether phase should be returned in radians
+                (True) or degrees (False)
+    :type  rad: boolean
+
+    :rtype: :py:class:`peng.eng.Waveform`
+
+    .. [[[cog cog.out(exobj_eng.get_sphinx_autodoc(raised=True)) ]]]
+    .. Auto-generated exceptions documentation for
+    .. peng.wave_functions.fftp
+
+    :raises:
+     * RuntimeError (Argument \`indep_max\` is not valid)
+
+     * RuntimeError (Argument \`indep_min\` is not valid)
+
+     * RuntimeError (Argument \`npoints\` is not valid)
+
+     * RuntimeError (Argument \`rad\` is not valid)
+
+     * RuntimeError (Argument \`unwrap\` is not valid)
+
+     * RuntimeError (Argument \`wave\` is not valid)
+
+     * RuntimeError (Incongruent \`indep_min\` and \`indep_max\`
+       arguments)
+
+     * RuntimeError (Non-uniform sampling)
+
+    .. [[[end]]]
+    """
+    return phase(
+        fft(wave, npoints, indep_min, indep_max), unwrap=unwrap, rad=rad
+    )
+
+
+@pexdoc.pcontracts.contract(
+    wave=Waveform, npoints='None|(int,>=1)',
+    indep_min='None|number', indep_max='None|number'
+)
+def fftr(wave, npoints=None, indep_min=None, indep_max=None):
+    r"""
+    Returns the real part of the Fast Fourier Transform of a waveform
+
+    :param wave: Waveform
+    :type  wave: :py:class:`peng.eng.Waveform`
+
+    :param npoints: Number of points to use in the transform. If **npoints**
+                    is less than the size of the independent variable vector
+                    the waveform is truncated; if **npoints** is greater than
+                    the size of the independent variable vector, the waveform
+                    is zero-padded
+    :type  npoints: positive integer
+
+    :param indep_min: Independent vector start point of computation
+    :type  indep_min: integer or float
+
+    :param indep_max: Independent vector stop point of computation
+    :type  indep_max: integer or float
+
+    :rtype: :py:class:`peng.eng.Waveform`
+
+    .. [[[cog cog.out(exobj_eng.get_sphinx_autodoc(raised=True)) ]]]
+    .. Auto-generated exceptions documentation for
+    .. peng.wave_functions.fftr
+
+    :raises:
+     * RuntimeError (Argument \`indep_max\` is not valid)
+
+     * RuntimeError (Argument \`indep_min\` is not valid)
+
+     * RuntimeError (Argument \`npoints\` is not valid)
+
+     * RuntimeError (Argument \`wave\` is not valid)
+
+     * RuntimeError (Incongruent \`indep_min\` and \`indep_max\`
+       arguments)
+
+     * RuntimeError (Non-uniform sampling)
+
+    .. [[[end]]]
+    """
+    return real(fft(wave, npoints, indep_min, indep_max))
+
+
+@pexdoc.pcontracts.contract(
+    wave=Waveform, dep_var='number', der='None|(int,>=-1,<=+1)', inst='int,>0',
+    indep_min='None|number', indep_max='None|number'
+)
+def find(wave, dep_var, der=None, inst=1, indep_min=None, indep_max=None):
     r"""
     Returns the independent variable vector point that corresponds to a given
     dependent variable vector point. If the dependent variable point is not in
@@ -523,9 +872,13 @@ def find(wave, dep_var, der=0, inst=1, indep_min=None, indep_max=None):
                 vector points that have positive derivatives when crossing
                 the requested dependent vector point are returned; if -1 only
                 independent vector points that have negative derivatives when
-                crossing the requested dependent vector point are returned,
-                otherwise if 0 all independent vector points are returned
-                regardless of the dependent vector derivative
+                crossing the requested dependent vector point are returned;
+                if 0 only independent vector points that have null derivatives
+                when crossing the requested dependent vector point are
+                returned; otherwise if None all independent vector points are
+                returned regardless of the dependent vector derivative. The
+                derivative of the first and last point of the waveform is
+                assumed to be null
     :type  der: integer, float or complex
 
     :param inst: Instance number filter. If, for example, **inst** equals 3,
@@ -542,11 +895,29 @@ def find(wave, dep_var, der=0, inst=1, indep_min=None, indep_max=None):
 
     :rtype: integer, float or None if the dependent variable point is not found
 
-    .. [[[cog cog.out(exobj_eng.get_sphinx_autodoc()) ]]]
+    .. [[[cog cog.out(exobj_eng.get_sphinx_autodoc(raised=True)) ]]]
+    .. Auto-generated exceptions documentation for
+    .. peng.wave_functions.find
+
+    :raises:
+     * RuntimeError (Argument \`dep_var\` is not valid)
+
+     * RuntimeError (Argument \`der\` is not valid)
+
+     * RuntimeError (Argument \`indep_max\` is not valid)
+
+     * RuntimeError (Argument \`indep_min\` is not valid)
+
+     * RuntimeError (Argument \`inst\` is not valid)
+
+     * RuntimeError (Argument \`wave\` is not valid)
+
+     * RuntimeError (Incongruent \`indep_min\` and \`indep_max\`
+       arguments)
+
     .. [[[end]]]
     """
-    # pylint: disable=R0913,R0914
-    # pylint: disable=C0325,W0613
+    # pylint: disable=C0325,R0914,W0613
     ret = copy.copy(wave)
     _bound_waveform(ret, indep_min, indep_max)
     close_min = numpy.isclose(min(ret._dep_vector), dep_var, FP_RTOL, FP_ATOL)
@@ -562,21 +933,55 @@ def find(wave, dep_var, der=0, inst=1, indep_min=None, indep_max=None):
     # Locations where dep_vector crosses dep_var or it is equal to it
     left_idx = numpy.where(numpy.diff(sign_wave))[0]
     # Remove elements to the left of exact matches
-
-    print(left_idx)
-    left_idx = numpy.delete(left_idx, exact_idx)
-    left_idx = numpy.delete(left_idx, exact_idx-1)
-    right_idx = left_idx+1
-    y_left = ret._dep_vector[left_idx]
-    y_right = ret._dep_vector[right_idx]
-    x_left = ret._indep_vector[left_idx]
-    x_right = ret._indep_vector[right_idx]
-    slope = ((y_left-y_right)/(x_left-x_right)).astype(float)
-    # y = y0+slope*(x-x0) => x0+(y-y0)/slope
-    print(ret._indep_vector[exact_idx])
-    indep_var = x_left+((dep_var-y_left)/slope)
-    indep_var.sort()
-    print(indep_var)
+    left_idx = numpy.setdiff1d(left_idx, exact_idx)
+    left_idx = numpy.setdiff1d(left_idx, exact_idx-1)
+    right_idx = left_idx+1 if left_idx.size else numpy.array([])
+    indep_var = (
+        ret._indep_vector[exact_idx] if exact_idx.size else numpy.array([])
+    )
+    dvector = (
+        numpy.zeros(exact_idx.size).astype(int)
+        if exact_idx.size else
+        numpy.array([])
+    )
+    if left_idx.size and (ret.interp == 'STAIRCASE'):
+        idvector = 2.0*(
+            ret._dep_vector[right_idx] > ret._dep_vector[left_idx]
+        ).astype(int)-1
+        if indep_var.size:
+            indep_var = numpy.concatenate(
+                (indep_var, ret._indep_vector[right_idx])
+            )
+            dvector = numpy.concatenate((dvector, idvector))
+            sidx = numpy.argsort(indep_var)
+            indep_var = indep_var[sidx]
+            dvector = dvector[sidx]
+        else:
+            indep_var = ret._indep_vector[right_idx]
+            dvector = idvector
+    elif left_idx.size:
+        y_left = ret._dep_vector[left_idx]
+        y_right = ret._dep_vector[right_idx]
+        x_left = ret._indep_vector[left_idx]
+        x_right = ret._indep_vector[right_idx]
+        slope = ((y_left-y_right)/(x_left-x_right)).astype(float)
+        # y = y0+slope*(x-x0) => x0+(y-y0)/slope
+        if indep_var.size:
+            indep_var = numpy.concatenate(
+                (indep_var, x_left+((dep_var-y_left)/slope))
+            )
+            dvector = numpy.concatenate(
+                (dvector, numpy.where(slope > 0, 1, -1))
+            )
+            sidx = numpy.argsort(indep_var)
+            indep_var = indep_var[sidx]
+            dvector = dvector[sidx]
+        else:
+            indep_var = x_left+((dep_var-y_left)/slope)
+            dvector = numpy.where(slope > 0, +1, -1)
+    if der is not None:
+        indep_var = numpy.extract(dvector == der, indep_var)
+    return indep_var[inst-1] if inst <= indep_var.size else None
 
 
 @pexdoc.pcontracts.contract(wave=Waveform)
@@ -598,6 +1003,345 @@ def floor(wave):
     .. [[[end]]]
     """
     return _operation(wave, 'floor', wave.dep_units, numpy.floor)
+
+
+@pexdoc.pcontracts.contract(
+    wave=Waveform, npoints='None|(int,>=1)',
+    indep_min='None|number', indep_max='None|number'
+)
+def ifft(wave, npoints=None, indep_min=None, indep_max=None):
+    r"""
+    Returns the inverse Fast Fourier Transform of a waveform
+
+    :param wave: Waveform
+    :type  wave: :py:class:`peng.eng.Waveform`
+
+    :param npoints: Number of points to use in the transform. If **npoints**
+                    is less than the size of the independent variable vector
+                    the waveform is truncated; if **npoints** is greater than
+                    the size of the independent variable vector, the waveform
+                    is zero-padded
+    :type  npoints: positive integer
+
+    :param indep_min: Independent vector start point of computation
+    :type  indep_min: integer or float
+
+    :param indep_max: Independent vector stop point of computation
+    :type  indep_max: integer or float
+
+    :rtype: :py:class:`peng.eng.Waveform`
+
+    .. [[[cog cog.out(exobj_eng.get_sphinx_autodoc(raised=True)) ]]]
+    .. Auto-generated exceptions documentation for
+    .. peng.wave_functions.ifft
+
+    :raises:
+     * RuntimeError (Argument \`indep_max\` is not valid)
+
+     * RuntimeError (Argument \`indep_min\` is not valid)
+
+     * RuntimeError (Argument \`npoints\` is not valid)
+
+     * RuntimeError (Argument \`wave\` is not valid)
+
+     * RuntimeError (Incongruent \`indep_min\` and \`indep_max\`
+       arguments)
+
+     * RuntimeError (Non-uniform frequency spacing)
+
+    .. [[[end]]]
+    """
+    ret = copy.copy(wave)
+    _bound_waveform(ret, indep_min, indep_max)
+    npoints = npoints or ret._indep_vector.size
+    spoints = min(ret._indep_vector.size, npoints)
+    sdiff = numpy.diff(ret._indep_vector[:spoints])
+    finc = sdiff[0]
+    cond = not numpy.all(
+        numpy.isclose(
+            sdiff, finc*numpy.ones(spoints-1), FP_RTOL, FP_ATOL
+        )
+    )
+    pexdoc.addex(RuntimeError, 'Non-uniform frequency spacing', cond)
+    fs = (npoints-1)*finc
+    tinc = 1/float(fs)
+    tend = 1/float(finc)
+    indep_vector = _barange(0, tend, tinc)
+    dep_vector = numpy.fft.ifft(ret._dep_vector, npoints)
+    return Waveform(
+        indep_vector=indep_vector,
+        dep_vector=dep_vector,
+        dep_name='ifft({0})'.format(ret.dep_name),
+        indep_scale='LINEAR',
+        dep_scale='LINEAR',
+        indep_units='sec',
+        dep_units=''
+    )
+
+
+@pexdoc.pcontracts.contract(
+    wave=Waveform, npoints='None|(int,>=1)',
+    indep_min='None|number', indep_max='None|number'
+)
+def ifftdb(wave, npoints=None, indep_min=None, indep_max=None):
+    r"""
+    Returns the inverse Fast Fourier Transform of a waveform with the dependent
+    variable vector expressed in decibels
+
+    :param wave: Waveform
+    :type  wave: :py:class:`peng.eng.Waveform`
+
+    :param npoints: Number of points to use in the transform. If **npoints**
+                    is less than the size of the independent variable vector
+                    the waveform is truncated; if **npoints** is greater than
+                    the size of the independent variable vector, the waveform
+                    is zero-padded
+    :type  npoints: positive integer
+
+    :param indep_min: Independent vector start point of computation
+    :type  indep_min: integer or float
+
+    :param indep_max: Independent vector stop point of computation
+    :type  indep_max: integer or float
+
+    :rtype: :py:class:`peng.eng.Waveform`
+
+    .. [[[cog cog.out(exobj_eng.get_sphinx_autodoc(raised=True)) ]]]
+    .. Auto-generated exceptions documentation for
+    .. peng.wave_functions.ifftdb
+
+    :raises:
+     * RuntimeError (Argument \`indep_max\` is not valid)
+
+     * RuntimeError (Argument \`indep_min\` is not valid)
+
+     * RuntimeError (Argument \`npoints\` is not valid)
+
+     * RuntimeError (Argument \`wave\` is not valid)
+
+     * RuntimeError (Incongruent \`indep_min\` and \`indep_max\`
+       arguments)
+
+     * RuntimeError (Non-uniform frequency spacing)
+
+    .. [[[end]]]
+    """
+    return db(ifft(wave, npoints, indep_min, indep_max))
+
+
+@pexdoc.pcontracts.contract(
+    wave=Waveform, npoints='None|(int,>=1)',
+    indep_min='None|number', indep_max='None|number'
+)
+def iffti(wave, npoints=None, indep_min=None, indep_max=None):
+    r"""
+    Returns the imaginary part of the inverse Fast Fourier Transform of a
+    waveform
+
+    :param wave: Waveform
+    :type  wave: :py:class:`peng.eng.Waveform`
+
+    :param npoints: Number of points to use in the transform. If **npoints**
+                    is less than the size of the independent variable vector
+                    the waveform is truncated; if **npoints** is greater than
+                    the size of the independent variable vector, the waveform
+                    is zero-padded
+    :type  npoints: positive integer
+
+    :param indep_min: Independent vector start point of computation
+    :type  indep_min: integer or float
+
+    :param indep_max: Independent vector stop point of computation
+    :type  indep_max: integer or float
+
+    :rtype: :py:class:`peng.eng.Waveform`
+
+    .. [[[cog cog.out(exobj_eng.get_sphinx_autodoc(raised=True)) ]]]
+    .. Auto-generated exceptions documentation for
+    .. peng.wave_functions.iffti
+
+    :raises:
+     * RuntimeError (Argument \`indep_max\` is not valid)
+
+     * RuntimeError (Argument \`indep_min\` is not valid)
+
+     * RuntimeError (Argument \`npoints\` is not valid)
+
+     * RuntimeError (Argument \`wave\` is not valid)
+
+     * RuntimeError (Incongruent \`indep_min\` and \`indep_max\`
+       arguments)
+
+     * RuntimeError (Non-uniform frequency spacing)
+
+    .. [[[end]]]
+    """
+    return imag(ifft(wave, npoints, indep_min, indep_max))
+
+
+@pexdoc.pcontracts.contract(
+    wave=Waveform, npoints='None|(int,>=1)',
+    indep_min='None|number', indep_max='None|number'
+)
+def ifftm(wave, npoints=None, indep_min=None, indep_max=None):
+    r"""
+    Returns the magnitude of the inverse Fast Fourier Transform of a waveform
+
+    :param wave: Waveform
+    :type  wave: :py:class:`peng.eng.Waveform`
+
+    :param npoints: Number of points to use in the transform. If **npoints**
+                    is less than the size of the independent variable vector
+                    the waveform is truncated; if **npoints** is greater than
+                    the size of the independent variable vector, the waveform
+                    is zero-padded
+    :type  npoints: positive integer
+
+    :param indep_min: Independent vector start point of computation
+    :type  indep_min: integer or float
+
+    :param indep_max: Independent vector stop point of computation
+    :type  indep_max: integer or float
+
+    :rtype: :py:class:`peng.eng.Waveform`
+
+    .. [[[cog cog.out(exobj_eng.get_sphinx_autodoc(raised=True)) ]]]
+    .. Auto-generated exceptions documentation for
+    .. peng.wave_functions.ifftm
+
+    :raises:
+     * RuntimeError (Argument \`indep_max\` is not valid)
+
+     * RuntimeError (Argument \`indep_min\` is not valid)
+
+     * RuntimeError (Argument \`npoints\` is not valid)
+
+     * RuntimeError (Argument \`wave\` is not valid)
+
+     * RuntimeError (Incongruent \`indep_min\` and \`indep_max\`
+       arguments)
+
+     * RuntimeError (Non-uniform frequency spacing)
+
+    .. [[[end]]]
+    """
+    return abs(ifft(wave, npoints, indep_min, indep_max))
+
+
+@pexdoc.pcontracts.contract(
+    wave=Waveform, npoints='None|(int,>=1)',
+    indep_min='None|number', indep_max='None|number',
+    unwrap=bool, rad=bool
+)
+def ifftp(
+        wave, npoints=None, indep_min=None, indep_max=None,
+        unwrap=True, rad=True
+):
+    r"""
+    Returns the phase of the inverse Fast Fourier Transform of a waveform
+
+    :param wave: Waveform
+    :type  wave: :py:class:`peng.eng.Waveform`
+
+    :param npoints: Number of points to use in the transform. If **npoints**
+                    is less than the size of the independent variable vector
+                    the waveform is truncated; if **npoints** is greater than
+                    the size of the independent variable vector, the waveform
+                    is zero-padded
+    :type  npoints: positive integer
+
+    :param indep_min: Independent vector start point of computation
+    :type  indep_min: integer or float
+
+    :param indep_max: Independent vector stop point of computation
+    :type  indep_max: integer or float
+
+    :param unwrap: Flag that indicates whether phase should change phase shifts
+                   to their :code:`2*pi` complement (True) or not (False)
+    :type  unwrap: boolean
+
+    :param rad: Flag that indicates whether phase should be returned in radians
+                (True) or degrees (False)
+    :type  rad: boolean
+
+    :rtype: :py:class:`peng.eng.Waveform`
+
+    .. [[[cog cog.out(exobj_eng.get_sphinx_autodoc(raised=True)) ]]]
+    .. Auto-generated exceptions documentation for
+    .. peng.wave_functions.ifftp
+
+    :raises:
+     * RuntimeError (Argument \`indep_max\` is not valid)
+
+     * RuntimeError (Argument \`indep_min\` is not valid)
+
+     * RuntimeError (Argument \`npoints\` is not valid)
+
+     * RuntimeError (Argument \`rad\` is not valid)
+
+     * RuntimeError (Argument \`unwrap\` is not valid)
+
+     * RuntimeError (Argument \`wave\` is not valid)
+
+     * RuntimeError (Incongruent \`indep_min\` and \`indep_max\`
+       arguments)
+
+     * RuntimeError (Non-uniform frequency spacing)
+
+    .. [[[end]]]
+    """
+    return phase(
+        ifft(wave, npoints, indep_min, indep_max), unwrap=unwrap, rad=rad
+    )
+
+
+@pexdoc.pcontracts.contract(
+    wave=Waveform, npoints='None|(int,>=1)',
+    indep_min='None|number', indep_max='None|number'
+)
+def ifftr(wave, npoints=None, indep_min=None, indep_max=None):
+    r"""
+    Returns the real part of the inverse Fast Fourier Transform of a waveform
+
+    :param wave: Waveform
+    :type  wave: :py:class:`peng.eng.Waveform`
+
+    :param npoints: Number of points to use in the transform. If **npoints**
+                    is less than the size of the independent variable vector
+                    the waveform is truncated; if **npoints** is greater than
+                    the size of the independent variable vector, the waveform
+                    is zero-padded
+    :type  npoints: positive integer
+
+    :param indep_min: Independent vector start point of computation
+    :type  indep_min: integer or float
+
+    :param indep_max: Independent vector stop point of computation
+    :type  indep_max: integer or float
+
+    :rtype: :py:class:`peng.eng.Waveform`
+
+    .. [[[cog cog.out(exobj_eng.get_sphinx_autodoc(raised=True)) ]]]
+    .. Auto-generated exceptions documentation for
+    .. peng.wave_functions.ifftr
+
+    :raises:
+     * RuntimeError (Argument \`indep_max\` is not valid)
+
+     * RuntimeError (Argument \`indep_min\` is not valid)
+
+     * RuntimeError (Argument \`npoints\` is not valid)
+
+     * RuntimeError (Argument \`wave\` is not valid)
+
+     * RuntimeError (Incongruent \`indep_min\` and \`indep_max\`
+       arguments)
+
+     * RuntimeError (Non-uniform frequency spacing)
+
+    .. [[[end]]]
+    """
+    return real(ifft(wave, npoints, indep_min, indep_max))
 
 
 @pexdoc.pcontracts.contract(wave=Waveform)
@@ -660,8 +1404,32 @@ def integral(wave, indep_min=None, indep_max=None):
     ret = copy.copy(wave)
     _bound_waveform(ret, indep_min, indep_max)
     ret._dep_vector = _running_area(ret._indep_vector, ret._dep_vector)
-    ret.indep_name = 'integral({0})'.format(ret._indep_name)
+    ret.dep_name = 'integral({0})'.format(ret._dep_name)
     ret.dep_units = _build_units(ret.indep_units, ret.dep_units, '*')
+    return ret
+
+
+@pexdoc.pcontracts.contract(wave=Waveform)
+def group_delay(wave):
+    r"""
+    Returns the group delay of a waveform
+
+    :param wave: Waveform
+    :type  wave: :py:class:`peng.eng.Waveform`
+
+    :rtype: :py:class:`peng.eng.Waveform`
+
+    .. [[[cog cog.out(exobj_eng.get_sphinx_autodoc(raised=True)) ]]]
+    .. Auto-generated exceptions documentation for
+    .. peng.wave_functions.group_delay
+
+    :raises: RuntimeError (Argument \`wave\` is not valid)
+
+    .. [[[end]]]
+    """
+    ret = -derivative(phase(wave, unwrap=True)/(2*math.pi))
+    ret.dep_name = 'group_delay({0})'.format(wave.dep_name)
+    ret.dep_units = 'sec'
     return ret
 
 
@@ -910,7 +1678,7 @@ def phase(wave, unwrap=True, rad=True):
     """
     ret = copy.copy(wave)
     ret.dep_units = 'rad' if rad else 'deg'
-    ret.indep_name = 'phase({0})'.format(ret.indep_name)
+    ret.dep_name = 'phase({0})'.format(ret.dep_name)
     ret._dep_vector = (
         numpy.unwrap(numpy.angle(ret._dep_vector))
         if unwrap else
@@ -975,7 +1743,7 @@ def round(wave, decimals=0):
         wave._dep_vector.dtype.name.startswith('complex')
     )
     ret = copy.copy(wave)
-    ret.indep_name = 'round({0}, {1})'.format(ret.indep_name, decimals)
+    ret.dep_name = 'round({0}, {1})'.format(ret.dep_name, decimals)
     ret._dep_vector = numpy.round(wave._dep_vector, decimals)
     return ret
 
@@ -1041,6 +1809,77 @@ def sqrt(wave):
     """
     dep_units = '{0}**0.5'.format(wave.dep_units)
     return _operation(wave, 'sqrt', dep_units, numpy.sqrt)
+
+
+@pexdoc.pcontracts.contract(
+    wave=Waveform, dep_name='str|None',
+    indep_min='None|number', indep_max='None|number', indep_step='None|number'
+)
+def subwave(
+        wave, dep_name=None, indep_min=None, indep_max=None, indep_step=None
+):
+    r"""
+    Returns a waveform that is a sub-set of a waveform, potentially re-sampled
+
+    :param wave: Waveform
+    :type  wave: :py:class:`peng.eng.Waveform`
+
+    :param  dep_name: Independent variable name
+    :type   dep_name: `NonNullString <http://pexdoc.readthedocs.io/en/stable/
+                        ptypes.html#nonnullstring>`_
+
+    :param indep_min: Independent vector start point of computation
+    :type  indep_min: integer or float
+
+    :param indep_max: Independent vector stop point of computation
+    :type  indep_max: integer or float
+
+    :param indep_step: Independent vector step
+    :type  indep_step: integer or float
+
+    :rtype: :py:class:`peng.eng.Waveform`
+
+    .. [[[cog cog.out(exobj_eng.get_sphinx_autodoc(raised=True)) ]]]
+    .. Auto-generated exceptions documentation for
+    .. peng.wave_functions.subwave
+
+    :raises:
+     * RuntimeError (Argument \`dep_name\` is not valid)
+
+     * RuntimeError (Argument \`indep_max\` is not valid)
+
+     * RuntimeError (Argument \`indep_min\` is not valid)
+
+     * RuntimeError (Argument \`indep_step\` is greater than independent
+       vector range)
+
+     * RuntimeError (Argument \`indep_step\` is not valid)
+
+     * RuntimeError (Argument \`wave\` is not valid)
+
+     * RuntimeError (Incongruent \`indep_min\` and \`indep_max\`
+       arguments)
+
+    .. [[[end]]]
+    """
+    ret = copy.copy(wave)
+    if dep_name is not None:
+        ret.dep_name = dep_name
+    _bound_waveform(ret, indep_min, indep_max)
+    pexdoc.addai(
+        'indep_step', bool((indep_step is not None) and (indep_step <= 0))
+    )
+    exmsg = 'Argument `indep_step` is greater than independent vector range'
+    cond = bool(
+        (indep_step is not None) and
+        (indep_step > ret._indep_vector[-1]-ret._indep_vector[0]))
+    pexdoc.addex(RuntimeError, exmsg, cond)
+    if indep_step:
+        indep_vector = _barange(indep_min, indep_max, indep_step)
+        dep_vector = _interp_dep_vector(ret, indep_vector)
+        ret._set_indep_vector(indep_vector, check=False)
+        ret._set_dep_vector(dep_vector, check=False)
+    return ret
 
 
 @pexdoc.pcontracts.contract(wave=Waveform)

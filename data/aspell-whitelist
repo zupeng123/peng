@@ -26,6 +26,7 @@ alist
 allclose
 alphanums
 antiquewhite
+anum
 anumber
 aobj
 api
@@ -52,6 +53,7 @@ argparse
 Argparse
 args
 ARGS
+argsort
 ArgumentParser
 ArgumentTypeError
 argv
@@ -70,10 +72,12 @@ astype
 async
 atan
 atanh
+atol
 ATOL
 atto
 attr
 AttributeError
+atype
 autoclass
 autodata
 autodoc
@@ -84,6 +88,7 @@ avec
 avector
 axarr
 backend
+barange
 BaseClass
 basename
 basicsource
@@ -101,11 +106,15 @@ bitwise
 blanchedalmond
 BLANKLINE
 blueviolet
+bmax
+bmin
 bmp
 bnode
+bnum
 bobj
 bool
 boolean
+btype
 buf
 BuGn
 builtin
@@ -181,6 +190,7 @@ const
 consts
 contextmanager
 cOnTiNuOuS
+ContractCheckers
 ContractNotRespected
 ContractSyntaxError
 copyfile
@@ -421,6 +431,14 @@ femto
 fex
 fexh
 fexlist
+fft
+FFT
+fftdb
+ffti
+fftm
+fftp
+fftr
+fftstar
 ffull
 fget
 fgrid
@@ -433,6 +451,7 @@ FileNameExists
 filenames
 fillvalue
 FinalClass
+finc
 finterp
 FIve
 fkeys
@@ -468,10 +487,13 @@ fproc
 fprog
 frac
 fref
+freqs
 frobj
 fromfile
 FromImportClosureClass
 frow
+fs
+fsample
 fset
 fslice
 fspace
@@ -543,7 +565,15 @@ idb
 idfilter
 idict
 idv
+idvector
 idx
+ifft
+ifftdb
+iffti
+ifftm
+ifftp
+ifftr
+ifftstar
 ifname
 ifobj
 ifrow
@@ -551,6 +581,7 @@ iftxt
 ihas
 iheader
 iitem
+il
 iline
 ilines
 imag
@@ -693,6 +724,7 @@ loc
 locs
 lOg
 loglog
+Lomb
 loren
 lpar
 lparent
@@ -741,6 +773,7 @@ meth
 mex
 MF
 mfile
+mfname
 mFrame
 mhz
 midnightblue
@@ -782,6 +815,7 @@ mycontract
 mydecorator
 MyException
 myfile
+myfunc
 MySource
 na
 nActual
@@ -877,6 +911,7 @@ nums
 nuniq
 nvar
 nvdata
+nvector
 nVectors
 nworld
 nzero
@@ -1059,6 +1094,7 @@ rcmag
 rcols
 rcount
 rcParams
+rct
 rdata
 rdelim
 rdesc
@@ -1157,6 +1193,7 @@ rtd
 RTD
 rtext
 r'The
+rtol
 RTOL
 rtruediv
 rtype
@@ -1172,6 +1209,7 @@ sandybrown
 sarg
 sbin
 SBIN
+Scargle
 schar
 scipy
 Scipy
@@ -1198,6 +1236,7 @@ Serafini
 seriesA
 seriesB
 setattr
+setdiff
 setitem
 setuptools
 Setuptools
@@ -1212,9 +1251,11 @@ shippable
 SHIPPABLE
 shlex
 shutil
+sidx
 SimpleClass
 sindent
 sinh
+sinusoid
 sitem
 skeys
 skyblue
@@ -1233,6 +1274,7 @@ spacings
 spartacus
 SPHINXOPTS
 spl
+spoints
 springgreen
 sqrt
 src
@@ -1274,6 +1316,7 @@ subobj
 subprocess
 subtokens
 subtree
+subwave
 svalue
 svg
 symlink
@@ -1322,6 +1365,7 @@ tHrEe
 thresholding
 TickProps
 timeit
+tinc
 tlist
 tmax
 tmin
@@ -1351,6 +1395,8 @@ tregexp
 triang
 trie
 truediv
+trunc
+tsample
 tstart
 tstop
 tstr
@@ -1389,6 +1435,7 @@ url
 urows
 usr
 utf
+uuid
 uvec
 va
 ValueError
@@ -1404,7 +1451,10 @@ versa
 verticalalignment
 Virtualenv
 vnum
+vtype
 vv
+WaveformClass
+WaveformFunctions
 waveforms
 waveform's
 Waveforms

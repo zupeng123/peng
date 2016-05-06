@@ -91,11 +91,10 @@ install:
   - pip install --upgrade -r%REPO_DIR%\\requirements\docs.pip
   - pip freeze
   ###
-  # Create directories for reports and images
+  # Create directories for reports
   ###
   - if not exist "%RESULTS_DIR%\\testresults" mkdir %RESULTS_DIR%\testresults
   - if not exist "%RESULTS_DIR%\\codecoverage" mkdir %RESULTS_DIR%\codecoverage
-  - if not exist "%RESULTS_DIR%\\images" mkdir %RESULTS_DIR%\images
 
 build_script:
   ###
@@ -135,7 +134,7 @@ test_script:
   # - pylint --rcfile=%EXTRA_DIR%\.pylintrc -f colorized -r no %EXTRA_DIR%\sbin
   # - pylint --rcfile=%EXTRA_DIR%\.pylintrc -f colorized -r no %EXTRA_DIR%\tests
   # - pylint --rcfile=%EXTRA_DIR%\.pylintrc -f colorized -r no %EXTRA_DIR%\docs\support
-  - py.test --doctest-glob='*.rst' %EXTRA_DIR%\docs
+  - py.test --doctest-glob="*.rst" %EXTRA_DIR%\docs
   - py.test --doctest-modules %SOURCE_DIR%
   # Coverage tests runs all the unit tests, no need to run the non-coverage
   # tests since the report is not being used
@@ -144,7 +143,3 @@ test_script:
   # Re-building exceptions auto-documentation takes a long time in Appveyor.
   # They have (and should be) spot-checked every now and then
   # - python %EXTRA_DIR%\sbin\build_docs.py -r -t -d %SOURCE_DIR%
-
-on_failure:
-  - 7z a %EXTRA_DIR%\actual_images.zip %EXTRA_DIR%\artifacts\*.png
-  - appveyor PushArtifact %EXTRA_DIR%\actual_images.zip

@@ -12,7 +12,6 @@ Contents
 
    README
    api
-   ptypes
 
 Indices and tables
 ==================

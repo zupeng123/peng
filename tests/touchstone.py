@@ -10,6 +10,7 @@ import copy
 import os
 import platform
 import random
+import uuid
 # PyPI imports
 import numpy
 import pytest
@@ -28,6 +29,9 @@ FP_RTOL = 1E-8
 ###
 # Helper function
 ###
+mfname = lambda nports: 'file_{0}.s{1}p'.format(uuid.uuid4(), nports)
+
+
 def all_options():
     """ Generate all possible option lines """
     units_opts = ['', 'GHz', 'MHz', 'KHz', 'Hz']
@@ -53,7 +57,7 @@ def ref_touchstone_data(nports=5, points=3):
     data = dict(
         points=points,
         freq=numpy.arange(1, points+1),
-        data=numpy.resize(cdata, (points, nports, nports))
+        pars=numpy.resize(cdata, (points, nports, nports))
     )
     ndata = dict(
         points=points,
@@ -70,7 +74,7 @@ def roundtrip_touchstone(nports, options, data, noise=None):
     Check write_touchstone function by saving data and then
     reading it back
     """
-    with TmpFile('file.s{0}p'.format(nports)) as fname:
+    with TmpFile(nports) as fname:
         peng.write_touchstone(
             fname, options, data, noise, frac_length=10, exp_length=2
         )
@@ -80,9 +84,9 @@ def roundtrip_touchstone(nports, options, data, noise=None):
     idata = idict['data']
     npoints = data['freq'].size
     assert npoints == idata['points']
-    rsdata = numpy.resize(numpy.copy(data['data']), (npoints, nports, nports))
+    rsdata = numpy.resize(numpy.copy(data['pars']), (npoints, nports, nports))
     assert numpy.allclose(idata['freq'], data['freq'], FP_RTOL, FP_ATOL)
-    assert numpy.allclose(idata['data'], rsdata, FP_RTOL, FP_ATOL)
+    assert numpy.allclose(idata['pars'], rsdata, FP_RTOL, FP_ATOL)
     idata = idict['noise']
     if idata:
         assert idata['freq'].size == noise['points']
@@ -113,7 +117,8 @@ def write_file(fobj, opts=None, data=None, eopts=None):
 ###
 class TmpFile(object):
     """ Create a temporary Touchstone file """
-    def __init__(self, fname):
+    def __init__(self, nports):
+        fname = mfname(nports)
         if platform.system().lower() == 'windows':  # pragma: no cover
             fname = fname.replace(os.sep, '/')
         self._fname = fname
@@ -161,7 +166,7 @@ def test_read_touchstone():
     # pylint: disable=R0915
     obj = peng.read_touchstone
     # Test parsing of options line
-    fname = 'file.s4p'
+    fname = mfname(4)
     for units, ptype, pformat, res in all_options():
         opts = [units, ptype, pformat, res]
         if all([not item for item in opts]):
@@ -178,24 +183,24 @@ def test_read_touchstone():
                 z0=75.0 if res == 'R 75' else 50.0
             )
     # Test multiple options line after first are ignored
-    fname = 'file2.s8p'
+    fname = mfname(8)
     with WriteTmpFile(fname, ['R 12', 'KHz'], [129*[1]], eopts='R 100 Z'):
         ret = obj(fname)
         assert ret['nports'] == 8
         assert ret['opts'] == dict(units='KHz', ptype='S', pformat='MA', z0=12)
     # Test file with one data point
-    fname = 'file.s1p'
+    fname = mfname(1)
     data = [[1, 2, 3]]
     with WriteTmpFile(fname, ['RI'], data):
         ret = obj(fname)
     assert ret['nports'] == 1
     assert ret['opts'] == dict(units='GHz', ptype='S', pformat='RI', z0=50)
     assert (ret['data']['freq'] == numpy.array([1.0])).all()
-    assert (ret['data']['data'] == numpy.array([2+3j])).all()
+    assert (ret['data']['pars'] == numpy.array([2+3j])).all()
     assert ret['noise'] == {}
     assert ret['data']['points'] == 1
     # Test 1-port data parsing (and end of line comments)
-    fname = 'file.s1p'
+    fname = mfname(1)
     data = [
         [1, 2, 3],
         [4, 5, '6 ! this is an end of line comment'],
@@ -207,12 +212,12 @@ def test_read_touchstone():
     assert ret['opts'] == dict(units='GHz', ptype='S', pformat='RI', z0=50)
     assert (ret['data']['freq'] == numpy.array([1.0, 4.0, 7.0])).all()
     ref = numpy.array([2+3j, 5+6j, 8+9j])
-    assert (ret['data']['data'] == ref).all()
+    assert (ret['data']['pars'] == ref).all()
     assert ret['noise'] == {}
     assert ret['data']['points'] == 3
     # Test 2-port data parsing
     # Real and imaginary format
-    fname = 'file.s2p'
+    fname = mfname(2)
     data = [
         [1, 2, 3, 4, 5, 1.1, 7, 2.2, 3.3],
         [2, 8, 9, 10, 11, 12, 13, 14, 15]
@@ -234,7 +239,7 @@ def test_read_touchstone():
             ]
         ]
     )
-    assert (ret['data']['data'] == ref).all()
+    assert (ret['data']['pars'] == ref).all()
     assert ret['data']['points'] == 2
     assert ret['noise'] == {}
     # Magnitude and angle
@@ -255,7 +260,7 @@ def test_read_touchstone():
             ]
         ]
     )
-    assert (ret['data']['data'] == ref).all()
+    assert (ret['data']['pars'] == ref).all()
     assert ret['data']['points'] == 2
     assert ret['noise'] == {}
     # Decibel-angle
@@ -277,12 +282,12 @@ def test_read_touchstone():
             ]
         ]
     )
-    assert (ret['data']['data'] == ref).all()
+    assert (ret['data']['pars'] == ref).all()
     assert ret['data']['points'] == 2
     assert ret['noise'] == {}
     # Test 3-port data parsing
     # Real and imaginary format
-    fname = 'file.s3p'
+    fname = mfname(3)
     data = [
         [1, 2, 3, 4, 5, 1.1, 7],
         [2.2, 3.3, 10, 20, 5.5, 6.6],
@@ -310,12 +315,12 @@ def test_read_touchstone():
             ]
         ]
     )
-    assert (ret['data']['data'] == ref).all()
+    assert (ret['data']['pars'] == ref).all()
     assert ret['data']['points'] == 2
     assert ret['noise'] == {}
     # Noise data
     # 1 point
-    fname = 'file.s2p'
+    fname = mfname(2)
     data = [
         [1, 2, 3, 4, 5, 1.1, 7, 2.2, 3.3],
         [0.5, 1, 2, 3, 4]
@@ -333,7 +338,7 @@ def test_read_touchstone():
             ]
         ]
     )
-    assert (ret['data']['data'] == ref).all()
+    assert (ret['data']['pars'] == ref).all()
     assert ret['data']['points'] == 1
     assert (ret['noise']['freq'] == numpy.array([0.5])).all()
     assert (ret['noise']['nf'] == numpy.array([1])).all()
@@ -341,7 +346,7 @@ def test_read_touchstone():
     assert (ret['noise']['res'] == numpy.array([4])).all()
     assert ret['noise']['points'] == 1
     # Multiple points
-    fname = 'file.s2p'
+    fname = mfname(2)
     data = [
         [1, 2, 3, 4, 5, 1.1, 7, 2.2, 3.3],
         [2, 8, 9, 10, 11, 12, 13, 14, 15],
@@ -372,7 +377,7 @@ def test_read_touchstone():
             ]
         ]
     )
-    assert (ret['data']['data'] == ref).all()
+    assert (ret['data']['pars'] == ref).all()
     assert ret['data']['points'] == 3
     assert (ret['noise']['freq'] == numpy.array([0.5, 1.5, 2.5, 3.5])).all()
     assert (ret['noise']['nf'] == numpy.array([1, 5, 9, 13.5])).all()
@@ -401,7 +406,7 @@ def test_read_touchstone_exceptions():
         with WriteTmpFile(item):
             AE(obj, RuntimeError, msg.format(item), item)
     msg = 'First non-comment line is not the option line'
-    fname = 'file.s1p'
+    fname = mfname(1)
     with WriteTmpFile(fname):
         AE(obj, RuntimeError, msg, fname)
     # Add an invalid option to options line
@@ -415,16 +420,16 @@ def test_read_touchstone_exceptions():
             AE(obj, RuntimeError, 'Illegal option line', fname)
     # No data
     with WriteTmpFile(fname, ['MA'], ['']):
-        AE(obj, RuntimeError, 'File file.s1p has no data', fname)
+        AE(obj, RuntimeError, 'File {0} has no data'.format(fname), fname)
     # Invalid data line
     with WriteTmpFile(fname, ['MA'], [[1, 2, 3], [3.5, 'a', 7]]):
         AE(obj, RuntimeError, 'Illegal data in line 4', fname)
     # Frequency not increasing
-    fname = 'file.s1p'
+    fname = mfname(1)
     with WriteTmpFile(fname, ['MA'], [[1, 2, 3], [2, 3, 4], [2, 5, 6]]):
         AE(obj, RuntimeError, 'Frequency must increase', fname)
     # Noise data
-    fname = 'file.s2p'
+    fname = mfname(2)
     data = [
         [1, 2, 3, 4, 5, 7, 8, 9, 10],
         [11, 12, 13, 14, 15, 16, 17, 18, 19],
@@ -434,7 +439,7 @@ def test_read_touchstone_exceptions():
     ]
     with WriteTmpFile(fname, ['MA'], data):
         AE(obj, RuntimeError, 'Noise frequency must increase', fname)
-    fname = 'file.s2p'
+    fname = mfname(2)
     data = [
         [1, 2, 3, 4, 5, 7, 8, 9, 10],
         [11, 12, 13, 14, 15, 16, 17, 18, 19],
@@ -467,7 +472,7 @@ def test_write_touchstone_exceptions():
     AE(obj, RuntimeError, msg, 'sdata.s4p', options, data, noise)
     msg = 'Malformed data'
     data = dict(
-        points=1, freq=numpy.array([1]), data=numpy.array([1, 2, 3, 4])
+        points=1, freq=numpy.array([1]), pars=numpy.array([1, 2, 3, 4])
     )
     AE(obj, RuntimeError, msg, 'sdata.s1p', options, data)
 
@@ -485,7 +490,7 @@ def test_write_touchstone():
        +4.1E+1 +4.2E+1 +4.3E+1 +4.4E+1 +4.5E+1 +4.6E+1 +4.7E+1 +4.8E+1
        +4.9E+1 +5.0E+1
 """
-    with TmpFile('file.s{0}p'.format(nports)) as fname:
+    with TmpFile(nports) as fname:
         obj(fname, options, data, frac_length=1, exp_length=1)
         comp_touchstone_str_data(fname, ref)
     nports, options, data, _ = ref_touchstone_data(5, 2)
@@ -505,7 +510,7 @@ def test_write_touchstone():
         +9.10E+1 +9.20E+1 +9.30E+1 +9.40E+1 +9.50E+1 +9.60E+1 +9.70E+1 +9.80E+1
         +9.90E+1 +1.00E+2
 """
-    with TmpFile('file.s{0}p'.format(nports)) as fname:
+    with TmpFile(nports) as fname:
         obj(fname, options, data, frac_length=2, exp_length=1)
         comp_touchstone_str_data(fname, ref)
     #
@@ -514,11 +519,11 @@ def test_write_touchstone():
     roundtrip_touchstone(nports, options, data)
     options['pformat'] = 'DB'
     # Check that data shape does not matter
-    data['data'] = numpy.resize(data['data'], data['data'].size)
-    rdata = numpy.copy(data['data'])
+    data['pars'] = numpy.resize(data['pars'], data['pars'].size)
+    rdata = numpy.copy(data['pars'])
     roundtrip_touchstone(nports, options, data)
     # Test data is not mutated in call
-    assert numpy.all(rdata == data['data'])
+    assert numpy.all(rdata == data['pars'])
     nports, options, data, _ = ref_touchstone_data(2, 10)
     roundtrip_touchstone(nports, options, data)
     nports, options, data, noise = ref_touchstone_data(2, 3)

@@ -189,7 +189,7 @@
 		"name":"Pmisc",
 		"optional":false,
 		"url":"http://pmisc.readthedocs.org",
-		"cat":["main"],
+		"cat":["main", "rtd"],
 		"ver":">=1.0.0",
 		"pos":24
 	},
@@ -197,7 +197,7 @@
 		"name":"Pexdoc",
 		"optional":false,
 		"url":"http://pexdoc.readthedocs.org",
-		"cat":["main"],
+		"cat":["main", "rtd"],
 		"ver":">=1.0.0",
 		"pos":25
 	}
