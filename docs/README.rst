@@ -274,7 +274,7 @@ Contributing
     * `Pylint`_ (Python 2.6: 1.3 or newer and older than 1.4, Python 2.7
       or newer: 1.3.1 or newer)
 
-    * `Pytest-coverage`_ (1.8.0 or newer)
+    * `Pytest-coverage`_ (1.8.0 or newer except 2.3.0)
 
     * `Pytest-xdist`_ (optional, 1.8.0 or newer)
 

@@ -195,7 +195,7 @@ def test_read_touchstone():
         ret = obj(fname)
     assert ret['nports'] == 1
     assert ret['opts'] == dict(units='GHz', ptype='S', pformat='RI', z0=50)
-    assert (ret['data']['freq'] == numpy.array([1.0])).all()
+    assert (ret['data']['freq'] == 1E9*numpy.array([1.0])).all()
     assert (ret['data']['pars'] == numpy.array([2+3j])).all()
     assert ret['noise'] == {}
     assert ret['data']['points'] == 1
@@ -210,7 +210,7 @@ def test_read_touchstone():
         ret = obj(fname)
     assert ret['nports'] == 1
     assert ret['opts'] == dict(units='GHz', ptype='S', pformat='RI', z0=50)
-    assert (ret['data']['freq'] == numpy.array([1.0, 4.0, 7.0])).all()
+    assert (ret['data']['freq'] == 1E9*numpy.array([1.0, 4.0, 7.0])).all()
     ref = numpy.array([2+3j, 5+6j, 8+9j])
     assert (ret['data']['pars'] == ref).all()
     assert ret['noise'] == {}
@@ -226,7 +226,7 @@ def test_read_touchstone():
         ret = obj(fname)
     assert ret['nports'] == 2
     assert ret['opts'] == dict(units='GHz', ptype='S', pformat='RI', z0=50)
-    assert (ret['data']['freq'] == numpy.array([1.0, 2.0])).all()
+    assert (ret['data']['freq'] == 1E9*numpy.array([1.0, 2.0])).all()
     ref = numpy.array(
         [
             [
@@ -247,7 +247,7 @@ def test_read_touchstone():
         ret = obj(fname)
     assert ret['nports'] == 2
     assert ret['opts'] == dict(units='GHz', ptype='S', pformat='MA', z0=50)
-    assert (ret['data']['freq'] == numpy.array([1.0, 2.0])).all()
+    assert (ret['data']['freq'] == 1E9*numpy.array([1.0, 2.0])).all()
     ref = numpy.array(
         [
             [
@@ -268,7 +268,7 @@ def test_read_touchstone():
         ret = obj(fname)
     assert ret['nports'] == 2
     assert ret['opts'] == dict(units='GHz', ptype='S', pformat='DB', z0=50)
-    assert (ret['data']['freq'] == numpy.array([1.0, 2.0])).all()
+    assert (ret['data']['freq'] == 1E9*numpy.array([1.0, 2.0])).all()
     idb = lambda x: 10**(x/20.0)
     ref = numpy.array(
         [
@@ -300,7 +300,7 @@ def test_read_touchstone():
         ret = obj(fname)
     assert ret['nports'] == 3
     assert ret['opts'] == dict(units='GHz', ptype='S', pformat='RI', z0=50)
-    assert (ret['data']['freq'] == numpy.array([1.0, 2.0])).all()
+    assert (ret['data']['freq'] == 1E9*numpy.array([1.0, 2.0])).all()
     ref = numpy.array(
         [
             [
@@ -329,7 +329,7 @@ def test_read_touchstone():
         ret = obj(fname)
     assert ret['nports'] == 2
     assert ret['opts'] == dict(units='GHz', ptype='S', pformat='RI', z0=50)
-    assert (ret['data']['freq'] == numpy.array([1.0])).all()
+    assert (ret['data']['freq'] == 1E9*numpy.array([1.0])).all()
     ref = numpy.array(
         [
             [
@@ -340,7 +340,7 @@ def test_read_touchstone():
     )
     assert (ret['data']['pars'] == ref).all()
     assert ret['data']['points'] == 1
-    assert (ret['noise']['freq'] == numpy.array([0.5])).all()
+    assert (ret['noise']['freq'] == 1E9*numpy.array([0.5])).all()
     assert (ret['noise']['nf'] == numpy.array([1])).all()
     assert (ret['noise']['rc'] == numpy.array([2*cmath.exp(3j)])).all()
     assert (ret['noise']['res'] == numpy.array([4])).all()
@@ -360,7 +360,7 @@ def test_read_touchstone():
         ret = obj(fname)
     assert ret['nports'] == 2
     assert ret['opts'] == dict(units='GHz', ptype='S', pformat='RI', z0=50)
-    assert (ret['data']['freq'] == numpy.array([1.0, 2.0, 3.0])).all()
+    assert (ret['data']['freq'] == 1E9*numpy.array([1.0, 2.0, 3.0])).all()
     ref = numpy.array(
         [
             [
@@ -379,7 +379,9 @@ def test_read_touchstone():
     )
     assert (ret['data']['pars'] == ref).all()
     assert ret['data']['points'] == 3
-    assert (ret['noise']['freq'] == numpy.array([0.5, 1.5, 2.5, 3.5])).all()
+    assert (
+        ret['noise']['freq'] == 1E9*numpy.array([0.5, 1.5, 2.5, 3.5])
+    ).all()
     assert (ret['noise']['nf'] == numpy.array([1, 5, 9, 13.5])).all()
     ref = numpy.array(
         [

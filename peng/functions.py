@@ -1,7 +1,7 @@
 # functions.py
 # Copyright (c) 2013-2016 Pablo Acosta-Serafini
 # See LICENSE for details
-# pylint: disable=C0111,E0611,R0914,W0105,W0611,W0631
+# pylint: disable=C0111,C0413,E0611,R0914,W0105,W0611,W0631
 
 # Standard library imports
 import collections

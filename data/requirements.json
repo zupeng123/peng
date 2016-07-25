@@ -110,7 +110,7 @@
 		"optional":false,
 		"url":"https://pypi.python.org/pypi/pytest-cov",
 		"cat":["tests"],
-		"ver":">=1.8.0",
+		"ver":">=1.8.0,!=2.3.0",
 		"pos":11
 	},
 	"pytest-xdist":{

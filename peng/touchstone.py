@@ -90,7 +90,8 @@ def read_touchstone(fname):
     files
 
     :param fname: Touchstone file name
-    :type  fname: ref:`FileNameExists`
+    :type  fname: `FileNameExists <https://pexdoc.readthedocs.io/en/stable/
+                  ptypes.html#filenameexists>`_
 
     :rtype: dictionary with the following structure:
 
@@ -131,6 +132,11 @@ def read_touchstone(fname):
      * RuntimeError (Noise frequency must increase)
 
     .. [[[end]]]
+
+    .. note:: The returned parameter(s) are complex numbers in real and
+       imaginary format regardless of the format used in the Touchstone file.
+       Similarly, the returned frequency vector unit is Hertz regardless of
+       the unit used in the Touchstone file
     """
     # pylint: disable=R0912,R0915,W0702
     # Exceptions definitions
@@ -156,6 +162,7 @@ def read_touchstone(fname):
     nports = int(match.groups()[0])
     opt_line = False
     units_dict = {'GHZ':'GHz', 'MHZ':'MHz', 'KHZ':'KHz', 'HZ':'Hz'}
+    scale_dict = {'GHZ':1E9, 'MHZ':1E6, 'KHZ':1E3, 'HZ':1.0}
     units_opts = ['GHZ', 'MHZ', 'KHZ', 'HZ']
     type_opts = ['S', 'Y', 'Z', 'H', 'G']
     format_opts = ['DB', 'MA', 'RI']
@@ -238,7 +245,7 @@ def read_touchstone(fname):
         rlmag_slice = slice(2, ndata.size, 5)
         rlphase_slice = slice(3, ndata.size, 5)
         res_slice = slice(4, ndata.size, 5)
-        ndict['freq'] = nfreq
+        ndict['freq'] = scale_dict[opts['units'].upper()]*nfreq
         ndict['nf'] = ndata[nfig_slice]
         ndict['rc'] = ndata[rlmag_slice]*numpy.exp(1j*ndata[rlphase_slice])
         ndict['res'] = ndata[res_slice]
@@ -246,7 +253,7 @@ def read_touchstone(fname):
     exdata(data.size % nums_per_freq != 0)
     npoints = int(data.size / nums_per_freq)
     exfreq(bool(ndiff.size and (min(ndiff) <= 0)))
-    data_dict['freq'] = freq
+    data_dict['freq'] = scale_dict[opts['units'].upper()]*freq
     d1slice = slice(0, data.size, 2)
     d2slice = slice(1, data.size, 2)
     data = numpy.delete(data, fslice)
@@ -289,7 +296,8 @@ def write_touchstone(fname, options, data, noise=None, frac_length=10,
     in scientific notation
 
     :param fname: Touchstone file name
-    :type  fname: ref:`FileName`
+    :type  fname: `FileNameExists <https://pexdoc.readthedocs.io/en/stable/
+                  ptypes.html#filenameexists>`_
 
     :param options: Touchstone file options
     :type  options: :ref:`TouchstoneOptions`
