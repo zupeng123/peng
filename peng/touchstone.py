@@ -69,10 +69,12 @@ def _chunk_pars(freq_vector, data_matrix, pformat):
             else: # elif pformat == 'DB':
                 vector1 = 20.0*numpy.log10(numpy.abs(cdata))
                 vector2 = numpy.angle(cdata)
-            sep_data = []
+            sep_data = numpy.array([])
             for item1, item2 in zip(vector1, vector2):
-                sep_data.extend([item1, item2])
-            ret = fpoint+sep_data
+                sep_data = numpy.concatenate(
+                    (sep_data, numpy.array([item1, item2]))
+                )
+            ret = numpy.concatenate((numpy.array(fpoint), sep_data))
             yield ret
 
 
@@ -167,7 +169,7 @@ def read_touchstone(fname):
     type_opts = ['S', 'Y', 'Z', 'H', 'G']
     format_opts = ['DB', 'MA', 'RI']
     opts = dict(units=None, ptype=None, pformat=None, z0=None)
-    data = numpy.array([])
+    data = numpy.array([], dtype=numpy.float64)
     with open(fname, 'r') as fobj:
         for num, line in enumerate(fobj):
             line = line.strip().upper()

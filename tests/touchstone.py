@@ -1,7 +1,7 @@
 # touchstone.py
 # Copyright (c) 2013-2016 Pablo Acosta-Serafini
 # See LICENSE for details
-# pylint: disable=C0103,C0111,E1101,R0903,W0611,W0702
+# pylint: disable=C0103,C0111,C0411,E1101,R0903,W0611,W0702
 
 # Standard library imports
 import itertools

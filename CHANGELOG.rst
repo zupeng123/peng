@@ -5,6 +5,8 @@
 Changelog
 =========
 
+* 1.0.3 [2016-07-29]: Fixed resolution loss when writing Touchstone files
+
 * 1.0.2 [2016-07-25]:
 
    * Frequency vector is now always in Hertz regardless of unit used in
