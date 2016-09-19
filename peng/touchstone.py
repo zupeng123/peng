@@ -5,6 +5,7 @@
 
 # Standard library imports
 import copy
+import math
 import os
 import re
 # PyPI imports
@@ -62,13 +63,13 @@ def _chunk_pars(freq_vector, data_matrix, pformat):
             cdata = data[index:index+length]
             if pformat == 'MA':
                 vector1 = numpy.abs(cdata)
-                vector2 = numpy.angle(cdata)
+                vector2 = numpy.rad2deg(numpy.angle(cdata))
             elif pformat == 'RI':
                 vector1 = numpy.real(cdata)
                 vector2 = numpy.imag(cdata)
             else: # elif pformat == 'DB':
                 vector1 = 20.0*numpy.log10(numpy.abs(cdata))
-                vector2 = numpy.angle(cdata)
+                vector2 = numpy.rad2deg(numpy.angle(cdata))
             sep_data = numpy.array([])
             for item1, item2 in zip(vector1, vector2):
                 sep_data = numpy.concatenate(
@@ -169,7 +170,7 @@ def read_touchstone(fname):
     type_opts = ['S', 'Y', 'Z', 'H', 'G']
     format_opts = ['DB', 'MA', 'RI']
     opts = dict(units=None, ptype=None, pformat=None, z0=None)
-    data = numpy.array([], dtype=numpy.float64)
+    data = numpy.array([])
     with open(fname, 'r') as fobj:
         for num, line in enumerate(fobj):
             line = line.strip().upper()
@@ -259,12 +260,15 @@ def read_touchstone(fname):
     d1slice = slice(0, data.size, 2)
     d2slice = slice(1, data.size, 2)
     data = numpy.delete(data, fslice)
+    # For format that has angle information, the angle is given in degrees
     if opts['pformat'] == 'MA':
-        data = data[d1slice]*numpy.exp(1j*data[d2slice])
+        data = data[d1slice]*numpy.exp(1j*numpy.deg2rad(data[d2slice]))
     elif opts['pformat'] == 'RI':
         data = data[d1slice]+(1j*data[d2slice])
     else: # if opts['pformat'] == 'DB':
-        data = (10**(data[d1slice]/20.0))*numpy.exp(1j*data[d2slice])
+        data = (10**(data[d1slice]/20.0))*numpy.exp(
+            1j*numpy.deg2rad(data[d2slice])
+        )
     if nports > 1:
         data_dict['pars'] = numpy.resize(data, (npoints, nports, nports))
     else:

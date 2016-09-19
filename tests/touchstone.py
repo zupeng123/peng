@@ -248,15 +248,16 @@ def test_read_touchstone():
     assert ret['nports'] == 2
     assert ret['opts'] == dict(units='GHz', ptype='S', pformat='MA', z0=50)
     assert (ret['data']['freq'] == 1E9*numpy.array([1.0, 2.0])).all()
+    d2r = lambda x: 1j*numpy.deg2rad(x)
     ref = numpy.array(
         [
             [
-                [2*cmath.exp(3j), 1.1*cmath.exp(7j)],
-                [4*cmath.exp(5j), 2.2*cmath.exp(3.3j)]
+                [2*cmath.exp(d2r(3)), 1.1*cmath.exp(d2r(7))],
+                [4*cmath.exp(d2r(5)), 2.2*cmath.exp(d2r(3.3))]
             ],
             [
-                [8*cmath.exp(9j), 12*cmath.exp(13j)],
-                [10*cmath.exp(11j), 14*cmath.exp(15j)]
+                [8*cmath.exp(d2r(9)), 12*cmath.exp(d2r(13))],
+                [10*cmath.exp(d2r(11)), 14*cmath.exp(d2r(15))]
             ]
         ]
     )
@@ -273,12 +274,12 @@ def test_read_touchstone():
     ref = numpy.array(
         [
             [
-                [idb(2)*cmath.exp(3j), idb(1.1)*cmath.exp(7j)],
-                [idb(4)*cmath.exp(5j), idb(2.2)*cmath.exp(3.3j)]
+                [idb(2)*cmath.exp(d2r(3)), idb(1.1)*cmath.exp(d2r(7))],
+                [idb(4)*cmath.exp(d2r(5)), idb(2.2)*cmath.exp(d2r(3.3))]
             ],
             [
-                [idb(8)*cmath.exp(9j), idb(12)*cmath.exp(13j)],
-                [idb(10)*cmath.exp(11j), idb(14)*cmath.exp(15j)]
+                [idb(8)*cmath.exp(d2r(9)), idb(12)*cmath.exp(d2r(13))],
+                [idb(10)*cmath.exp(d2r(11)), idb(14)*cmath.exp(d2r(15))]
             ]
         ]
     )

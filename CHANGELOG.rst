@@ -5,6 +5,9 @@
 Changelog
 =========
 
+* 1.0.4 [2016-09-19]: Fixed Touchstone read function for "MA" and "DB" formats
+  where the angles were incorrectly treated as being in radians
+
 * 1.0.3 [2016-07-29]: Fixed resolution loss when writing Touchstone files
 
 * 1.0.2 [2016-07-25]:
