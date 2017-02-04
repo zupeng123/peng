@@ -1,5 +1,5 @@
 # wave_core.py
-# Copyright (c) 2013-2016 Pablo Acosta-Serafini
+# Copyright (c) 2013-2017 Pablo Acosta-Serafini
 # See LICENSE for details
 # pylint: disable=C0103,C0111,C0113,C0122,E0611,E1101,E1127,R0201,R0915,W0212
 
