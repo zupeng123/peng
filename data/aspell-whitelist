@@ -410,6 +410,7 @@ exnports
 exnum
 exobj
 ExObj
+EXOBJ
 exopt
 exoutput
 expoints

@@ -28,6 +28,10 @@ EXMSG3 = (
     'slice indices must be integers or None or have an __index__ method'
 )
 EXMSG4 = 'Slice value is not valid'
+TOKENS = [int(_) for _ in numpy.__version__.split('.')]
+INVALID_SLICE_EXOBJ = (
+    IndexError if (TOKENS[0] <= 1) and (TOKENS[1] <= 11) else TypeError
+)
 INVALID_SLICE_LIST = [EXMSG1, EXMSG2, EXMSG3, EXMSG4]
 
 
@@ -912,9 +916,10 @@ class TestWaveform(object):
     def test_getitem_exceptions(self):
         """ Test __getitem__ method exceptions """
         obj_a = std_wobj('obj_a')
-        with pytest.raises(IndexError) as excinfo:
+        with pytest.raises(INVALID_SLICE_EXOBJ) as excinfo:
             _ = obj_a[1:'a']
         assert GET_EXMSG(excinfo) in INVALID_SLICE_LIST
+
 
     def test_gt(self):
         """ Test __gt__ method behavior """
@@ -1336,11 +1341,6 @@ class TestWaveform(object):
         """ Test __pow__ method behavior """
         obj_a = std_wobj('obj_a')
         obj_b = std_wobj('obj_b', dep_vector=array([8, -1, -4]), dep_units='A')
-        obj_c = std_wobj(
-            'obj_c', dep_vector=array([1679616, 0, 0]), dep_units='Volts**A'
-        )
-        aobj = obj_a**obj_b
-        assert aobj == obj_c
         obj_a.dep_vector = obj_a.dep_vector.astype('float')
         obj_c = std_wobj(
             'obj_c',
@@ -1416,6 +1416,17 @@ class TestWaveform(object):
         with pytest.raises(RuntimeError) as excinfo:
             _ = obj_b ** obj_a
         assert GET_EXMSG(excinfo) == 'Waveforms are not compatible'
+        obj_a = std_wobj('obj_a')
+        obj_b = std_wobj('obj_b', dep_vector=array([8, -1, -4]), dep_units='A')
+        with pytest.raises(ValueError) as excinfo:
+            _ = obj_a**obj_b
+        msg = 'Integers to negative integer powers are not allowed'
+        assert GET_EXMSG(excinfo) == msg
+        msg = 'Independent variable ranges do not overlap'
+        obj_a.indep_vector = array([100, 200, 300])
+        with pytest.raises(RuntimeError) as excinfo:
+            _ = obj_a**obj_b
+        assert GET_EXMSG(excinfo) == msg
 
     def test_real(self):
         """ Test real property behavior """
@@ -1526,7 +1537,7 @@ class TestWaveform(object):
     def test_setitem_exceptions(self):
         """ Test __setitem__ method exceptions """
         obj_a = std_wobj('obj_a')
-        with pytest.raises(IndexError) as excinfo:
+        with pytest.raises(INVALID_SLICE_EXOBJ) as excinfo:
             obj_a[1:'a'] = [(1, 2)]
         assert GET_EXMSG(excinfo) in INVALID_SLICE_LIST
         items = [

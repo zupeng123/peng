@@ -1082,6 +1082,8 @@ class Waveform(object):
 
          * TypeError (Data type not supported)
 
+         * ValueError (Integers to negative integer powers are not allowed)
+
         .. [[[end]]]
         """
         return self._operation(other, '**')
@@ -1591,10 +1593,16 @@ interp='CONTINUOUS')"
                 dep_vector_b if not reflected else dep_vector_a,
             )
         elif operand == '**':
-            dep_vector = numpy.power(
-                dep_vector_a if not reflected else dep_vector_b,
-                dep_vector_b if not reflected else dep_vector_a,
+            exint = pexdoc.exh.addex(
+                ValueError,
+                'Integers to negative integer powers are not allowed'
             )
+            base = dep_vector_a if not reflected else dep_vector_b
+            exp = dep_vector_b if not reflected else dep_vector_a
+            base_is_int = base.dtype.name.startswith('int')
+            exp_is_int = exp.dtype.name.startswith('int')
+            exint(base_is_int and exp_is_int and any(exp < 0))
+            dep_vector = numpy.power(base, exp)
             if proc_units and scalar and (not ureflected):
                 dep_units = '({0})**({1})'.format(
                     self._dep_units,
