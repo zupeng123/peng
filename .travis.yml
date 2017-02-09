@@ -40,7 +40,7 @@ before_install:
         bash Anaconda2-2.4.0-MacOSX-x86_64.sh -b;
         export PATH=/Users/travis/anaconda2/bin/:${PATH};
         conda update -y conda;
-        conda create -y --name ${INTERP} python=${JNAME};
+        conda create -y --name ${INTERP} python=${JNAME} numpy scipy;
         source activate ${INTERP};
         export PATH=/Users/travis/anaconda2/envs/${INTERP}/bin:${PATH};
         export PYTHON_SITE_PACKAGES=$(pip show pip | grep "Location*" | sed -E "s/^.*Location\W (.*)/\1/g");
@@ -95,6 +95,22 @@ before_install:
   - if [ "${TRAVIS_OS_NAME}" == "linux" ]; then
         sudo apt-get update;
         sudo apt-get install -qq -y aspell;
+        sudo apt-get install -qq -y curl;
+        sudo apt-get install -qq -y imagemagick;
+        sudo apt-get install -qq -y python-dev;
+        sudo apt-get install -qq -y python2.7-dev;
+        sudo apt-get install -qq -y libfreetype6-dev;
+        sudo apt-get install -qq -y libjpeg-dev;
+        sudo apt-get install -qq -y liblapack-dev;
+        sudo apt-get install -qq -y libpng12-dev;
+        sudo apt-get install -qq -y gfortran;
+        sudo apt-get install -qq -y libatlas-dev;
+        sudo apt-get install -qq -y libatlas-base-dev;
+        sudo apt-get install -qq -y libatlas3gf-base;
+        sudo apt-get install -qq -y python-numpy;
+        sudo apt-get install -qq -y python-scipy;
+        sudo apt-get install -qq -y python3-numpy;
+        sudo apt-get install -qq -y python3-scipy;
     fi
 
 install:
