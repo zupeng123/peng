@@ -1,7 +1,8 @@
 # wave_core.py
 # Copyright (c) 2013-2017 Pablo Acosta-Serafini
 # See LICENSE for details
-# pylint: disable=C0103,C0111,C0113,C0122,E0611,E1101,E1127,R0201,R0915,W0212
+# pylint: disable=C0103,C0111,C0113,C0122,E0611,E1101,E1127,R0201,R0915
+# pylint: disable=W0212,W0613
 
 # Standard library imports
 from __future__ import print_function
@@ -780,6 +781,32 @@ class TestWaveform(object):
         obj_b = std_wobj('obj_b', dep_units='unknown')
         assert not obj_a == obj_b
         assert obj_a != obj_b
+        # Waveforms with non-overlapping independent ranges are not equal
+        obj_a = std_wobj('obj_a')
+        obj_b = std_wobj('obj_b', indep_vector=array([100, 2000, 3000]))
+        assert not obj_a == obj_b
+
+    @pytest.mark.wave_core
+    def test_eq_neq_exceptions(self, monkeypatch):
+        # pylint: disable=W0104,W0612
+        def _mock1_get_indep_vector(wave_a, wave_b):
+            raise RuntimeError('This is test #1')
+        def _mock2_get_indep_vector(wave_a, wave_b):
+            raise ValueError('This is test #2')
+        monkeypatch.setattr(
+            peng.wave_core, '_get_indep_vector', _mock1_get_indep_vector
+        )
+        obj_a = std_wobj('obj_a')
+        obj_b = std_wobj('obj_b')
+        with pytest.raises(RuntimeError) as excinfo:
+            obj_a == obj_b
+        assert GET_EXMSG(excinfo) == 'This is test #1'
+        monkeypatch.setattr(
+            peng.wave_core, '_get_indep_vector', _mock2_get_indep_vector
+        )
+        with pytest.raises(ValueError) as excinfo:
+            obj_a == obj_b
+        assert GET_EXMSG(excinfo) == 'This is test #2'
 
     def test_floordiv(self):
         """ Test __floordiv__ method behavior """
@@ -1282,6 +1309,22 @@ class TestWaveform(object):
         ref = std_wobj('obj', dep_vector=array([1, 2+2j, 3+3j]))
         assert ((-ref).dep_vector == array([-1, -2-2j, -3-3j])).all()
 
+    @pytest.mark.wave_core
+    def test_operation_exceptions(self):
+        # pylint: disable=W0123
+        obj_a = std_wobj('obj_a')
+        obj_b = std_wobj('obj_b')
+        obj_b.indep_vector = array([1E6, 2E6, 3E6])
+        msg = 'Independent variable ranges do not overlap'
+        obj_a.indep_vector = array([100, 200, 300])
+        cop_list = [
+            '>', '>=', '<', '<=', '%', '<<', '>>', '&', '^', '|', '//'
+        ]
+        for cop in cop_list:
+            with pytest.raises(RuntimeError) as excinfo:
+                eval('obj_a'+cop+'obj_b')
+            assert GET_EXMSG(excinfo) == msg
+
     def test_or(self):
         """ Test __or__ method behavior """
         obj_a = std_wobj('obj_a')
@@ -1421,11 +1464,6 @@ class TestWaveform(object):
         with pytest.raises(ValueError) as excinfo:
             _ = obj_a**obj_b
         msg = 'Integers to negative integer powers are not allowed'
-        assert GET_EXMSG(excinfo) == msg
-        msg = 'Independent variable ranges do not overlap'
-        obj_a.indep_vector = array([100, 200, 300])
-        with pytest.raises(RuntimeError) as excinfo:
-            _ = obj_a**obj_b
         assert GET_EXMSG(excinfo) == msg
 
     def test_real(self):

@@ -6,6 +6,8 @@
 # Standard library imports
 import collections
 import copy
+import sys
+import warnings
 # PyPI imports
 import numpy
 import pexdoc.exh
@@ -63,6 +65,18 @@ data
 ###
 # Functions
 ###
+if sys.hexversion < 0x03000000: # pragma: no cover
+    def _get_ex_msg(obj):
+        """ Get exception message """
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore')
+            return obj.value.message if hasattr(obj, 'value') else obj.message
+else: # pragma: no cover
+    def _get_ex_msg(obj):
+        """ Get exception message """
+        return obj.value.args[0] if hasattr(obj, 'value') else obj.args[0]
+
+
 def _homogenize_waves(wave_a, wave_b):
     """
     Generate the combined independent variable vector from
@@ -368,6 +382,8 @@ class Waveform(object):
         .. peng.wave_core.Waveform.__and__
 
         :raises:
+         * RuntimeError (Independent variable ranges do not overlap)
+
          * RuntimeError (Waveforms are not compatible)
 
          * TypeError (Complex operands not supported)
@@ -585,7 +601,15 @@ class Waveform(object):
             )
         if not isinstance(other, Waveform):
             return False
-        _, dep_vector_a, dep_vector_b = _homogenize_waves(self, other)
+        try:
+            _, dep_vector_a, dep_vector_b = _homogenize_waves(self, other)
+        except RuntimeError as exobj:
+            msg = 'Independent variable ranges do not overlap'
+            if _get_ex_msg(exobj) == msg:
+                return False
+            raise
+        except:
+            raise
         ctuple = (
             numpy.all(
                 numpy.isclose(dep_vector_a, dep_vector_b, FP_RTOL, FP_ATOL)
@@ -628,6 +652,8 @@ class Waveform(object):
         .. peng.wave_core.Waveform.__floordiv__
 
         :raises:
+         * RuntimeError (Independent variable ranges do not overlap)
+
          * RuntimeError (Waveforms are not compatible)
 
          * TypeError (Complex operands not supported)
@@ -650,6 +676,8 @@ class Waveform(object):
         .. peng.wave_core.Waveform.__ge__
 
         :raises:
+         * RuntimeError (Independent variable ranges do not overlap)
+
          * RuntimeError (Waveforms are not compatible)
 
          * TypeError (Complex operands not supported)
@@ -693,6 +721,8 @@ class Waveform(object):
         .. peng.wave_core.Waveform.__gt__
 
         :raises:
+         * RuntimeError (Independent variable ranges do not overlap)
+
          * RuntimeError (Waveforms are not compatible)
 
          * TypeError (Complex operands not supported)
@@ -765,6 +795,8 @@ class Waveform(object):
         .. peng.wave_core.Waveform.__le__
 
         :raises:
+         * RuntimeError (Independent variable ranges do not overlap)
+
          * RuntimeError (Waveforms are not compatible)
 
          * TypeError (Complex operands not supported)
@@ -809,6 +841,8 @@ class Waveform(object):
         .. peng.wave_core.Waveform.__lshift__
 
         :raises:
+         * RuntimeError (Independent variable ranges do not overlap)
+
          * RuntimeError (Waveforms are not compatible)
 
          * TypeError (Complex operands not supported)
@@ -829,6 +863,8 @@ class Waveform(object):
         .. peng.wave_core.Waveform.__lt__
 
         :raises:
+         * RuntimeError (Independent variable ranges do not overlap)
+
          * RuntimeError (Waveforms are not compatible)
 
          * TypeError (Complex operands not supported)
@@ -868,6 +904,8 @@ class Waveform(object):
         .. peng.wave_core.Waveform.__mod__
 
         :raises:
+         * RuntimeError (Independent variable ranges do not overlap)
+
          * RuntimeError (Waveforms are not compatible)
 
          * TypeError (Complex operands not supported)
@@ -1015,6 +1053,8 @@ class Waveform(object):
         .. peng.wave_core.Waveform.__or__
 
         :raises:
+         * RuntimeError (Independent variable ranges do not overlap)
+
          * RuntimeError (Waveforms are not compatible)
 
          * TypeError (Complex operands not supported)
@@ -1078,6 +1118,8 @@ class Waveform(object):
         .. peng.wave_core.Waveform.__pow__
 
         :raises:
+         * RuntimeError (Independent variable ranges do not overlap)
+
          * RuntimeError (Waveforms are not compatible)
 
          * TypeError (Data type not supported)
@@ -1229,6 +1271,8 @@ interp='CONTINUOUS')"
         .. peng.wave_core.Waveform.__rshift__
 
         :raises:
+         * RuntimeError (Independent variable ranges do not overlap)
+
          * RuntimeError (Waveforms are not compatible)
 
          * TypeError (Complex operands not supported)
@@ -1481,6 +1525,8 @@ interp='CONTINUOUS')"
         .. peng.wave_core.Waveform.__xor__
 
         :raises:
+         * RuntimeError (Independent variable ranges do not overlap)
+
          * RuntimeError (Waveforms are not compatible)
 
          * TypeError (Complex operands not supported)
