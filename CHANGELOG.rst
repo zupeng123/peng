@@ -5,7 +5,7 @@
 Changelog
 =========
 
-* 1.0.6 [2016-02-10]: Package build enhancements and fixes
+* 1.0.6 [2016-02-11]: Package build enhancements and fixes
 
 * 1.0.5 [2016-02-09]: Python 3.6 support
 
