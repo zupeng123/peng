@@ -269,9 +269,9 @@ Contributing
       1.12, Python 3.4: 1.8.2 or newer, Python 3.5: 1.8.2 or newer,
       Python 3.6: 1.8.2 or newer)
 
-    * `Pexdoc`_ (1.0.8 or newer)
+    * `Pexdoc`_ (1.0.9 or newer)
 
-    * `Pmisc`_ (1.2.1 or newer)
+    * `Pmisc`_ (1.2.2 or newer)
 
     * `Py.test`_ (2.7.0 or newer)
 

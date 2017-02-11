@@ -140,6 +140,7 @@ ceil
 cfg
 cfiles
 cfilter
+CFLAGS
 Changelog
 CHANGELOG
 chdir
@@ -236,6 +237,7 @@ cvector
 CVECTOR
 cwd
 cwrite
+CXXFLAGS
 darg
 dargs
 darkblue
@@ -348,6 +350,7 @@ EngPower
 ENGPOWER
 env
 environ
+envs
 eobj
 eol
 EOL
@@ -390,6 +393,7 @@ ExHandle
 exhobj
 EXHOBJ
 exitem
+exitfirst
 exkey
 exlength
 exline
@@ -455,6 +459,7 @@ FinalClass
 finc
 finterp
 FIve
+fjoint
 fkeys
 flabel
 flength
@@ -675,6 +680,7 @@ lavenderblush
 lawngreen
 lcount
 ldelim
+LDFLAGS
 ldig
 le
 Leftarrow

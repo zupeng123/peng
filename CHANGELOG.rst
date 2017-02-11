@@ -5,6 +5,10 @@
 Changelog
 =========
 
+* 1.0.6 [2016-02-10]: Package build enhancements and fixes
+
+* 1.0.5 [2016-02-09]: Python 3.6 support
+
 * 1.0.4 [2016-09-19]: Fixed Touchstone read function for "MA" and "DB" formats
   where the angles were incorrectly treated as being in radians
 
