@@ -1,5 +1,5 @@
 # touchstone.py
-# Copyright (c) 2013-2017 Pablo Acosta-Serafini
+# Copyright (c) 2013-2018 Pablo Acosta-Serafini
 # See LICENSE for details
 # pylint: disable=C0103,C0111,C0411,E1101,R0903,W0611,W0702
 

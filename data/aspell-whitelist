@@ -392,6 +392,7 @@ EXH
 ExHandle
 exhobj
 EXHOBJ
+exint
 exitem
 exitfirst
 exkey
@@ -1262,6 +1263,7 @@ shlex
 shutil
 sidx
 SimpleClass
+simplefilter
 sindent
 sinh
 sinusoid

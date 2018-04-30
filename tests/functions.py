@@ -1,5 +1,5 @@
 # functions.py
-# Copyright (c) 2013-2017 Pablo Acosta-Serafini
+# Copyright (c) 2013-2018 Pablo Acosta-Serafini
 # See LICENSE for details
 # pylint: disable=C0103,C0111,C0302,E0611,R0913,R0915,W0108,W0212
 
