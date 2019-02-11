@@ -1,12 +1,15 @@
 # ptypes.py
-# Copyright (c) 2013-2018 Pablo Acosta-Serafini
+# Copyright (c) 2013-2019 Pablo Acosta-Serafini
 # See LICENSE for details
 # pylint: disable=C0111,R0916
 
 # Standard library imports
 import math
+import warnings
 # PyPI imports
-import numpy
+with warnings.catch_warnings():
+    warnings.filterwarnings("ignore", category=RuntimeWarning)
+    import numpy
 import pexdoc.pcontracts
 
 
@@ -198,7 +201,6 @@ def touchstone_data(obj):
     nports = int(math.sqrt(obj['pars'].size/obj['freq'].size))
     if obj['points']*(nports**2) != obj['pars'].size:
         raise ValueError(pexdoc.pcontracts.get_exdesc())
-    return None
 
 
 @pexdoc.pcontracts.new_contract()
@@ -260,7 +262,6 @@ def touchstone_options(obj):
        (obj['pformat'].lower() in ['db', 'ma', 'ri']) and
        isinstance(obj['z0'], float) and (obj['z0'] >= 0)):
         raise ValueError(pexdoc.pcontracts.get_exdesc())
-    return None
 
 
 @pexdoc.pcontracts.new_contract()
@@ -322,7 +323,7 @@ def wave_vectors(obj):
     :rtype: None
     """
     exdesc = pexdoc.pcontracts.get_exdesc()
-    if not isinstance(obj, list) or (isinstance(obj, list) and not len(obj)):
+    if not isinstance(obj, list) or (isinstance(obj, list) and not obj):
         raise ValueError(exdesc)
     if any([not (isinstance(item, tuple) and len(item) == 2) for item in obj]):
         raise ValueError(exdesc)

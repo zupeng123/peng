@@ -1,14 +1,18 @@
 # wave_functions.py
-# Copyright (c) 2013-2018 Pablo Acosta-Serafini
+# Copyright (c) 2013-2019 Pablo Acosta-Serafini
 # See LICENSE for details
 # pylint: disable=C0111
 
 # Standard library imports
 import copy
 import math
+import warnings
 # PyPI imports
 import numpy
-import pytest
+with warnings.catch_warnings():
+    from _pytest.warning_types import PytestWarning
+    warnings.filterwarnings("ignore", category=PytestWarning)
+    import pytest
 from pmisc import AE, AI, RE
 # Intra-package imports
 import peng

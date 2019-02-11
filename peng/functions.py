@@ -1,37 +1,6 @@
-# functions.py
-# Copyright (c) 2013-2018 Pablo Acosta-Serafini
-# See LICENSE for details
-# pylint: disable=C0111,C0413,E0611,R0914,W0105,W0611,W0631
-
-# Standard library imports
-import collections
-import copy
-import math
-import textwrap
-import decimal
-from decimal import Decimal
-import sys
-if sys.hexversion < 0x03000000: # pragma: no cover
-    from itertools import izip_longest as zip_longest
-else: # pragma: no cover
-    from itertools import zip_longest
-# PyPI imports
-import numpy
-import pexdoc.exh
-from pexdoc.ptypes import non_negative_integer
-import pyparsing
-# Intra-package imports imports
-from .ptypes import (
-    engineering_notation_number,
-    engineering_notation_suffix,
-)
-pyparsing.ParserElement.enablePackrat()
-
-
-###
-# Exception tracing initialization code
-###
 """
+Define general engineering functions.
+
 [[[cog
 import os, sys
 if sys.hexversion < 0x03000000:
@@ -44,6 +13,38 @@ exobj_eng = trace_ex_eng_functions.trace_module(no_print=True)
 ]]]
 [[[end]]]
 """
+# functions.py
+# Copyright (c) 2013-2019 Pablo Acosta-Serafini
+# See LICENSE for details
+# pylint: disable=C0111,C0413,E0611,R0914,R0915,R1710,W0105,W0611,W0631
+
+# Standard library imports
+import collections
+import copy
+import math
+import re
+import textwrap
+import decimal
+from decimal import Decimal
+import sys
+if sys.hexversion < 0x03000000: # pragma: no cover
+    from itertools import izip_longest as zip_longest
+else: # pragma: no cover
+    from itertools import zip_longest
+import warnings
+# PyPI imports
+with warnings.catch_warnings():
+    warnings.filterwarnings("ignore", category=RuntimeWarning)
+    import numpy
+import pexdoc.exh
+from pexdoc.ptypes import non_negative_integer
+import pyparsing
+# Intra-package imports imports
+from .ptypes import (
+    engineering_notation_number,
+    engineering_notation_suffix,
+)
+pyparsing.ParserElement.enablePackrat()
 
 
 ###
@@ -374,7 +375,7 @@ def peng(number, frac_length, rjust=True):
 
     :param frac_length: Number of digits of fractional part
     :type  frac_length: `NonNegativeInteger
-                        <http://pexdoc.readthedocs.io/en/stable/
+                        <https://pexdoc.readthedocs.io/en/stable/
                         ptypes.html#nonnegativeinteger>`_
 
     :param rjust: Flag that indicates whether the number is
@@ -899,6 +900,29 @@ def pprint_vector(vector, limit=False, width=None, indent=0,
         [ 0.001, 2e-05, 300000000.0, ..., 700, 8, 9 ]
     """
     # pylint: disable=R0912,R0913
+    num_digits = 12
+    approx = lambda x: float(x) if '.' not in x else round(float(x), num_digits)
+    def limstr(value):
+        str1 = str(value)
+        iscomplex = isinstance(value, complex)
+        str1 = str1.lstrip('(').rstrip(')')
+        if '.' not in str1:
+            return str1
+        if iscomplex:
+            sign = '+' if value.imag >= 0 else '-'
+            regexp = re.compile(
+                r'(.*(?:[Ee][\+-]\d+)?)' +
+                (r'\+' if sign == '+' else '-') +
+                r'(.*(?:[Ee][\+-]\d+)?j)'
+            )
+            rvalue, ivalue = regexp.match(str1).groups()
+            return str(
+                complex(
+                    approx(rvalue), approx(sign+ivalue.strip('j'))
+                )
+            ).lstrip('(').rstrip(')')
+        str2 = str(round(value, num_digits))
+        return str2 if len(str1) > len(str2) else str1
     def _str(*args):
         """
         Converts numbers (integers, float or complex) to string, optionally
@@ -906,13 +930,13 @@ def pprint_vector(vector, limit=False, width=None, indent=0,
         """
         ret = [
             (
-                str(element)
+                limstr(element)
                 if not eng else
                 peng(element, frac_length, True)
             )
             if not isinstance(element, complex) else
             (
-                str(element).lstrip('(').rstrip(')')
+                limstr(element)
                 if not eng else
                 '{real}{sign}{imag}j'.format(
                     real=peng(element.real, frac_length, True),
@@ -1000,30 +1024,29 @@ def pprint_vector(vector, limit=False, width=None, indent=0,
     if not eng:
         if not limit:
             return '\n'.join(rlist)
-        else:
-            num_elements = len(rlist)
-            return '\n'.join(
-                [
-                    '{spaces}{line}{comma}'.format(
-                        spaces=(' '*(indent+2)) if num > 0 else '',
-                        line=(
-                            line.center(actual_width).rstrip()
-                            if line.strip() == '...' else
-                            line
-                        ),
-                        comma=(
-                            ','
-                            if ((num < num_elements-1) and
-                               (not line.endswith(',')) and
-                               (line.strip() != '...')) else
-                            ''
-                        )
+        num_elements = len(rlist)
+        return '\n'.join(
+            [
+                '{spaces}{line}{comma}'.format(
+                    spaces=(' '*(indent+2)) if num > 0 else '',
+                    line=(
+                        line.center(actual_width).rstrip()
+                        if line.strip() == '...' else
+                        line
+                    ),
+                    comma=(
+                        ','
+                        if ((num < num_elements-1) and
+                           (not line.endswith(',')) and
+                           (line.strip() != '...')) else
+                        ''
                     )
-                    if num > 0 else
-                    line
-                    for num, line in enumerate(rlist)
-                ]
-            )
+                )
+                if num > 0 else
+                line
+                for num, line in enumerate(rlist)
+            ]
+        )
     # Align elements across multiple lines
     if limit:
         remainder_list = [line.lstrip() for line in rlist[1:]]

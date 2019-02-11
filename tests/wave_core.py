@@ -1,7 +1,7 @@
 # wave_core.py
-# Copyright (c) 2013-2018 Pablo Acosta-Serafini
+# Copyright (c) 2013-2019 Pablo Acosta-Serafini
 # See LICENSE for details
-# pylint: disable=C0103,C0111,C0113,C0122,E0611,E1101,E1127,R0201,R0915
+# pylint: disable=C0103,C0111,C0113,C0122,E0611,E1101,E1127,R0201,R0205,R0915
 # pylint: disable=W0212,W0613
 
 # Standard library imports
@@ -9,10 +9,14 @@ from __future__ import print_function
 import copy
 import math
 import sys
+import warnings
 # PyPI imports
 import numpy
 from numpy import array
-import pytest
+with warnings.catch_warnings():
+    from _pytest.warning_types import PytestWarning
+    warnings.filterwarnings("ignore", category=PytestWarning)
+    import pytest
 from pmisc import AE, AI, APROP, AROPROP, GET_EXMSG, compare_strings
 # Intra-package imports
 import peng
@@ -219,7 +223,7 @@ class TestWaveform(object):
         AROPROP(obj, prop)
 
     def test_init(self):
-        """ Test constructor behaviour """
+        """ Test constructor behavior """
         indep_vector = array([1, 2, 3])
         dep_vector = array([4, 5, 6])
         obj = peng.Waveform(
@@ -737,7 +741,6 @@ class TestWaveform(object):
         """ Test __eq__ and __ne__ methods behavior """
         obj_a = std_wobj('obj_a')
         obj_b = std_wobj('obj_b')
-        assert obj_a == obj_a
         assert obj_a == obj_b
         dep_vector = copy.copy(obj_b.dep_vector)
         obj_b = std_wobj(

@@ -27,6 +27,7 @@ docs/_build
 shippable/
 vdisks/
 build/
+.pytest_cache/
 !tests/support/ref_images_1/*.png
 !tests/support/ref_images_2/*.png
 !tests/support/ref_images_3/*.png

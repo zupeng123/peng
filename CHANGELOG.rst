@@ -1,9 +1,13 @@
 .. CHANGELOG.rst
-.. Copyright (c) 2013-2018 Pablo Acosta-Serafini
+.. Copyright (c) 2013-2019 Pablo Acosta-Serafini
 .. See LICENSE for details
 
 Changelog
 =========
+
+* 1.0.7 [2019-03-XX]: Dropped support for Python 2.6, 3.3 and 3.4. Updates
+  to support newest versions of dependencies. Abstracted package management to
+  a lightweight framework
 
 * 1.0.6 [2016-02-11]: Package build enhancements and fixes
 

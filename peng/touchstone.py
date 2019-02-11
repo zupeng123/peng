@@ -1,15 +1,29 @@
+"""
+Define Touchstone file format reader/writer.
+
+[[[cog
+import os, sys
+sys.path.append(os.environ['TRACER_DIR'])
+import trace_ex_eng_touchstone
+exobj = trace_ex_eng_touchstone.trace_module(no_print=True)
+]]]
+[[[end]]]
+"""
 # touchstone.py
-# Copyright (c) 2013-2018 Pablo Acosta-Serafini
+# Copyright (c) 2013-2019 Pablo Acosta-Serafini
 # See LICENSE for details
-# pylint: disable=C0103,C0111,C0325,E1101,R0914,W0611
+# pylint: disable=C0103,C0111,C0325,E1101,E1111,R0914,W0611
 
 # Standard library imports
 import copy
 import math
 import os
 import re
+import warnings
 # PyPI imports
-import numpy
+with warnings.catch_warnings():
+    warnings.filterwarnings("ignore", category=RuntimeWarning)
+    import numpy
 import pexdoc.exh
 import pexdoc.pcontracts
 from pexdoc.ptypes import file_name, file_name_exists
@@ -20,20 +34,6 @@ from .ptypes import (
     touchstone_noise_data,
     touchstone_options
 )
-
-
-###
-# Exception tracing initialization code
-###
-"""
-[[[cog
-import os, sys
-sys.path.append(os.environ['TRACER_DIR'])
-import trace_ex_eng_touchstone
-exobj = trace_ex_eng_touchstone.trace_module(no_print=True)
-]]]
-[[[end]]]
-"""
 
 
 ###

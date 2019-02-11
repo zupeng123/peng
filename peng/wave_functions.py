@@ -1,25 +1,6 @@
-# wave_functions.py
-# Copyright (c) 2013-2018 Pablo Acosta-Serafini
-# See LICENSE for details
-# pylint: disable=C0103,C0111,E1101,R0913,W0212
-
-# Standard library imports
-import copy
-import math
-# PyPI imports
-import numpy
-import pexdoc.exh
-import pexdoc.pcontracts
-# Intra-package imports imports
-from .functions import remove_extra_delims
-from .constants import FP_ATOL, FP_RTOL
-from .wave_core import _interp_dep_vector, Waveform
-
-
-###
-# Exception tracing initialization code
-###
 """
+Waveform pseudo-type functions.
+
 [[[cog
 import os, sys
 if sys.hexversion < 0x03000000:
@@ -32,7 +13,25 @@ exobj_eng = trace_ex_eng_wave_functions.trace_module(no_print=True)
 ]]]
 [[[end]]]
 """
+# wave_functions.py
+# Copyright (c) 2013-2019 Pablo Acosta-Serafini
+# See LICENSE for details
+# pylint: disable=C0103,C0111,E1101,E1111,R0913,W0212
 
+# Standard library imports
+import copy
+import math
+import warnings
+# PyPI imports
+with warnings.catch_warnings():
+    warnings.filterwarnings("ignore", category=RuntimeWarning)
+    import numpy
+import pexdoc.exh
+import pexdoc.pcontracts
+# Intra-package imports imports
+from .functions import remove_extra_delims
+from .constants import FP_ATOL, FP_RTOL
+from .wave_core import _interp_dep_vector, Waveform
 
 
 ###
@@ -1825,7 +1824,7 @@ def subwave(
     :type  wave: :py:class:`peng.eng.Waveform`
 
     :param  dep_name: Independent variable name
-    :type   dep_name: `NonNullString <http://pexdoc.readthedocs.io/en/stable/
+    :type   dep_name: `NonNullString <https://pexdoc.readthedocs.io/en/stable/
                         ptypes.html#nonnullstring>`_
 
     :param indep_min: Independent vector start point of computation

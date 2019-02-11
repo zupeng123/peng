@@ -1,37 +1,6 @@
-﻿# wave_core.py
-# Copyright (c) 2013-2018 Pablo Acosta-Serafini
-# See LICENSE for details
-# pylint: disable=C0111,C0302,E0611,R0912,R0915,W0105,W0611
-
-# Standard library imports
-import collections
-import copy
-import sys
-import warnings
-# PyPI imports
-import numpy
-import pexdoc.exh
-import pexdoc.pcontracts
-from pexdoc.ptypes import (
-    non_null_string,
-)
-import scipy.interpolate
-# Intra-package imports imports
-from .functions import pprint_vector, remove_extra_delims
-from .ptypes import (
-    increasing_real_numpy_vector,
-    number_numpy_vector,
-    wave_scale_option,
-    wave_interp_option,
-    wave_vectors,
-)
-from .constants import FP_ATOL, FP_RTOL
-
-
-###
-# Exception tracing initialization code
-###
 """
+Define waveform pseudo-type.
+
 [[[cog
 import os, sys
 if sys.hexversion < 0x03000000:
@@ -49,6 +18,39 @@ cname = (
 ]]]
 [[[end]]]
 """
+# wave_core.py
+# Copyright (c) 2013-2019 Pablo Acosta-Serafini
+# See LICENSE for details
+# pylint: disable=C0111,C0302,E0611,E1111,R0205,R0912,R0915,R1701,R1706
+# pylint: disable=W0105,W0611,W0706
+
+# Standard library imports
+import collections
+import copy
+import sys
+import warnings
+# PyPI imports
+with warnings.catch_warnings():
+    warnings.filterwarnings("ignore", category=RuntimeWarning)
+    import numpy
+import pexdoc.exh
+import pexdoc.pcontracts
+from pexdoc.ptypes import (
+    non_null_string,
+)
+with warnings.catch_warnings():
+    warnings.filterwarnings("ignore", category=RuntimeWarning)
+    import scipy.interpolate
+# Intra-package imports imports
+from .functions import pprint_vector, remove_extra_delims
+from .ptypes import (
+    increasing_real_numpy_vector,
+    number_numpy_vector,
+    wave_scale_option,
+    wave_interp_option,
+    wave_vectors,
+)
+from .constants import FP_ATOL, FP_RTOL
 
 
 ###
@@ -213,7 +215,7 @@ class Waveform(object):
     :type  dep_vector: :ref:`NumberNumpyVector`
 
     :param  dep_name: Independent variable name
-    :type   dep_name: `NonNullString <http://pexdoc.readthedocs.io/en/stable/
+    :type   dep_name: `NonNullString <https://pexdoc.readthedocs.io/en/stable/
                         ptypes.html#nonnullstring>`_
 
     :param  indep_scale: Independent variable scale
@@ -303,12 +305,12 @@ class Waveform(object):
 
             >>> import math, numpy, peng
             >>> indep_vector = numpy.array([1, 2, 3])
-            >>> dep_vector = numpy.array([4, -5, complex(1, math.sqrt(3))])
+            >>> dep_vector = numpy.array([4.0, -5.0, complex(0, 3)])
             >>> obj = peng.Waveform(indep_vector, dep_vector, 'obj')
             >>> print(abs(obj))
             Waveform: abs(obj)
             Independent variable: [ 1, 2, 3 ]
-            Dependent variable: [ 4+0j, 5+0j, 2+0j ]
+            Dependent variable: [ 4+0j, 5+0j, 3+0j ]
             Independent variable scale: LINEAR
             Dependent variable scale: LINEAR
             Independent variable units: (None)
@@ -1598,15 +1600,15 @@ interp='CONTINUOUS')"
         dep_units = self._dep_units if proc_units else ''
         if operand == '<':
             return (dep_vector_a < dep_vector_b).all()
-        elif operand == '<=':
+        if operand == '<=':
             ne_test = numpy.isclose(
                 dep_vector_a, dep_vector_b, FP_RTOL, FP_ATOL
             )
             comp_test = dep_vector_a < dep_vector_b
             return numpy.logical_or(ne_test, comp_test).all()
-        elif operand == '>':
+        if operand == '>':
             return (dep_vector_a > dep_vector_b).all()
-        elif operand == '>=':
+        if operand == '>=':
             ne_test = numpy.isclose(
                 dep_vector_a, dep_vector_b, FP_RTOL, FP_ATOL
             )
