@@ -26,8 +26,8 @@
     :alt: Continuous integration test status
 
 .. image::
-    https://img.shields.io/azure-devops/coverage/pmasdev/peng/3.svg
-    :target: https://dev.azure.com/pmasdev/peng/_build?definitionId=3&_a=summary
+    https://img.shields.io/azure-devops/coverage/pmasdev/peng/6.svg
+    :target: https://dev.azure.com/pmasdev/peng/_build?definitionId=6&_a=summary
     :alt: Continuous integration test coverage
 
 .. image::
