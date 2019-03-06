@@ -18,7 +18,7 @@ PYLINT_CMD := pylint \
 	--output-format=colorized \
 	--reports=no \
 	--score=no
-LINT_DIRS := $(shell $(SBIN_DIR)/get-source-dirs.sh $(REPO_DIR) $(SOURCE_DIR) $(EXTRA_DIR))
+LINT_FILES := $(shell $(SBIN_DIR)/get-pylint-files.sh $(PKG_NAME) $(REPO_DIR) $(SOURCE_DIR) $(EXTRA_DIR))
 ###
 
 asort:
@@ -31,8 +31,7 @@ bdist: meta
 
 black:
 	@echo "Blackifying Python files"
-	@echo "Locations: $(LINT_DIRS)"
-	@black $(LINT_DIRS)
+	@black $(LINT_FILES)
 
 clean: FORCE
 	@echo "Cleaning package"
@@ -64,8 +63,7 @@ FORCE:
 
 lint:
 	@echo "Running Pylint on package files"
-	@echo "Locations: $(LINT_DIRS)"
-	@PYTHONPATH="$(PYLINT_PLUGINS_DIR):$(PYTHONPATH)" $(PYLINT_CMD) $(LINT_DIRS)
+	@PYTHONPATH="$(PYLINT_PLUGINS_DIR):$(PYTHONPATH)" $(PYLINT_CMD) $(LINT_FILES)
 
 meta: FORCE
 	@echo "Updating package meta-data"
