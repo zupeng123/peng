@@ -167,8 +167,8 @@ def read_touchstone(fname):
     type_opts = ["S", "Y", "Z", "H", "G"]
     format_opts = ["DB", "MA", "RI"]
     opts = dict(units=None, ptype=None, pformat=None, z0=None)
-    data = numpy.array([])
-    with open(fname, "r") as fobj:
+    data = []
+    with open(fname, 'r') as fobj:
         for num, line in enumerate(fobj):
             line = line.strip().upper()
             # Comment line
@@ -212,10 +212,11 @@ def read_touchstone(fname):
                     idx = line.index("!")
                     line = line[:idx]
                 tokens = [float(item) for item in line.split()]
-                data = numpy.append(data, tokens)
+                data.append(tokens)
             except:
-                exline(True, edata={"field": "lineno", "value": num + 1})
-    exnodata(not data.size, edata={"field": "fname", "value": fname})
+                exline(True, edata={'field':'lineno', 'value':num+1})
+    data = numpy.concatenate(data)
+    exnodata(not data.size, edata={'field':'fname', 'value':fname})
     # Set option defaults
     opts["units"] = opts["units"] or "GHz"
     opts["ptype"] = opts["ptype"] or "S"
