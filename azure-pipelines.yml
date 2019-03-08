@@ -223,15 +223,16 @@ jobs:
       echo "LANG=${LANG}"
       echo "DICPATH=${DICPATH}"
       if [ -f "${EXTRA_DIR}/data/exclude-linting" ]; then
-        export PYLINT_FILES="$("${SBIN_DIR}"/get_pylint_files.py -r "${REPO_DIR}" -s "${SOURCE_DIR}" -e "${EXTRA_DIR}" -x "${EXTRA_DIR}"/data/exclude-linting)"
+        export PKG_LINT_FILES="$("${SBIN_DIR}"/get_pylint_files.py -r "${REPO_DIR}" -s "${SOURCE_DIR}" -e "${EXTRA_DIR}" -x "${EXTRA_DIR}"/data/exclude-linting)"
       else
-        export PYLINT_FILES="$("${SBIN_DIR}"/get_pylint_files.py -r "${REPO_DIR}" -s "${SOURCE_DIR}" -e "${EXTRA_DIR}")"
+        export PKG_LINT_FILES="$("${SBIN_DIR}"/get_pylint_files.py -r "${REPO_DIR}" -s "${SOURCE_DIR}" -e "${EXTRA_DIR}")"
       fi
       echo "Files to lint"
-      for fname in ${PYLINT_FILES}; do
+      for fname in ${PKG_LINT_FILES}; do
         echo "${fname}"
       done
-      pylint --rcfile="${EXTRA_DIR}/.pylintrc" "${PYLINT_CLI_APPEND}" --output-format=colorized --reports=no --score=no ${PYLINT_FILES} || exit 1
+      pylint --rcfile="${EXTRA_DIR}/.pylintrc" "${PYLINT_CLI_APPEND}" --output-format=colorized --reports=no --score=no ${PKG_LINT_FILES} || exit 1
+      pydocstyle --config="${EXTRA_DIR}/.pydocstyle" ${PKG_LINT_FILES} || exit 1
     displayName: Check code standards compliance
   - bash: |
       cd "${EXTRA_DIR}"/tests || exit 1

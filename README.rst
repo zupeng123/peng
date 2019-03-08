@@ -61,6 +61,7 @@ Description
 .. _Numpy: http://www.numpy.org
 .. _Pexdoc: http://pexdoc.readthedocs.org
 .. _Pmisc: http://pmisc.readthedocs.org
+.. _Pydocstyle: http://www.pydocstyle.org
 .. _Pylint: https://www.pylint.org
 .. _PyParsing: https://pyparsing.wikispaces.com
 .. _Py.test: http://pytest.org
@@ -264,6 +265,8 @@ Contributing
     * `Py.test`_ (2.7.0 or newer)
 
     * `PyParsing`_ (2.0.7 or newer)
+
+    * `Pydocstyle`_ (3.0.0 or newer)
 
     * `Pylint`_ (1.3.1 or newer)
 

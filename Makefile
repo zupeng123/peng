@@ -30,7 +30,7 @@ bdist: meta
 	@cd $(PKG_DIR) && python setup.py bdist
 
 black:
-	@echo "Blackifying Python files"
+	@echo "Running Black on package files"
 	@black $(LINT_FILES)
 
 clean: FORCE
@@ -61,15 +61,21 @@ default:
 
 FORCE:
 
-lint:
-	@echo "Running Pylint on package files"
-	@PYTHONPATH="$(PYLINT_PLUGINS_DIR):$(PYTHONPATH)" $(PYLINT_CMD) $(LINT_FILES)
+lint: pylint pydocstyle
 
 meta: FORCE
 	@echo "Updating package meta-data"
 	@cd $(SBIN_DIR) && ./update_copyright_notice.py
 	@cd $(SBIN_DIR) && ./gen_req_files.py
 	@cd $(SBIN_DIR) && ./gen_pkg_manifest.py
+
+pylint:
+	@echo "Running Pylint on package files"
+	@PYTHONPATH="$(PYLINT_PLUGINS_DIR):$(PYTHONPATH)" $(PYLINT_CMD) $(LINT_FILES)
+
+pydocstyle:
+	@echo "Running Pydocstyle on package files"
+	@pydocstyle --config=$(EXTRA_DIR)/.pydocstyle $(LINT_FILES)
 
 sdist: meta
 	@echo "Creating source distribution"
