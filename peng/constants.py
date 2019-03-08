@@ -7,7 +7,7 @@
 ###
 # Global variables
 ###
-FP_ATOL = 1E-11
+FP_ATOL = 1e-11
 """
 Absolute tolerance used in equality comparisons
 
@@ -15,7 +15,7 @@ Absolute tolerance used in equality comparisons
 """
 
 
-FP_RTOL = 1E-11
+FP_RTOL = 1e-11
 """
 Relative tolerance used in equality comparisons
 

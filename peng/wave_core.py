@@ -33,7 +33,7 @@ import warnings
 # PyPI imports
 with warnings.catch_warnings():
     warnings.filterwarnings("ignore", category=RuntimeWarning)
-    import numpy
+    import numpy as np
 import pexdoc.exh
 import pexdoc.pcontracts
 from pexdoc.ptypes import non_null_string
@@ -103,12 +103,12 @@ def _interp_dep_vector(wave, indep_vector):
     dep_vector_is_complex = wave.dep_vector.dtype.name.startswith("complex")
     if (wave.interp, wave.indep_scale) == ("CONTINUOUS", "LOG"):
         wave_interp_func = scipy.interpolate.interp1d(
-            numpy.log10(wave.indep_vector), wave.dep_vector
+            np.log10(wave.indep_vector), wave.dep_vector
         )
-        ret = wave_interp_func(numpy.log10(indep_vector))
+        ret = wave_interp_func(np.log10(indep_vector))
     elif (wave.interp, wave.indep_scale) == ("CONTINUOUS", "LINEAR"):
         dep_vector = (
-            wave.dep_vector.astype(numpy.float64)
+            wave.dep_vector.astype(np.float64)
             if not dep_vector_is_complex
             else wave.dep_vector
         )
@@ -121,18 +121,15 @@ def _interp_dep_vector(wave, indep_vector):
         # Interpolator does not return the right value for the last
         # data point, it gives the previous "stair" value
         ret = wave_interp_func(indep_vector)
-        eq_comp = numpy.all(
-            numpy.isclose(wave.indep_vector[-1], indep_vector[-1], FP_RTOL, FP_ATOL)
+        eq_comp = np.all(
+            np.isclose(wave.indep_vector[-1], indep_vector[-1], FP_RTOL, FP_ATOL)
         )
         if eq_comp:
             ret[-1] = wave.dep_vector[-1]
-    round_ret = numpy.round(ret, 0)
+    round_ret = np.round(ret, 0)
     return (
         round_ret.astype("int")
-        if (
-            dep_vector_is_int
-            and numpy.all(numpy.isclose(round_ret, ret, FP_RTOL, FP_ATOL))
-        )
+        if (dep_vector_is_int and np.all(np.isclose(round_ret, ret, FP_RTOL, FP_ATOL)))
         else ret
     )
 
@@ -140,13 +137,11 @@ def _interp_dep_vector(wave, indep_vector):
 def _get_indep_vector(wave_a, wave_b):
     """Create new independent variable vector."""
     exobj = pexdoc.exh.addex(RuntimeError, "Independent variable ranges do not overlap")
-    min_bound = max(numpy.min(wave_a.indep_vector), numpy.min(wave_b.indep_vector))
-    max_bound = min(numpy.max(wave_a.indep_vector), numpy.max(wave_b.indep_vector))
+    min_bound = max(np.min(wave_a.indep_vector), np.min(wave_b.indep_vector))
+    max_bound = min(np.max(wave_a.indep_vector), np.max(wave_b.indep_vector))
     exobj(bool(min_bound > max_bound))
-    raw_range = numpy.unique(
-        numpy.concatenate((wave_a.indep_vector, wave_b.indep_vector))
-    )
-    return raw_range[numpy.logical_and(min_bound <= raw_range, raw_range <= max_bound)]
+    raw_range = np.unique(np.concatenate((wave_a.indep_vector, wave_b.indep_vector)))
+    return raw_range[np.logical_and(min_bound <= raw_range, raw_range <= max_bound)]
 
 
 def _verify_compatibility(wave_a, wave_b, check_dep_units=True):
@@ -293,8 +288,8 @@ class Waveform(object):
         For example:
 
             >>> import math, numpy, peng
-            >>> indep_vector = numpy.array([1, 2, 3])
-            >>> dep_vector = numpy.array([4.0, -5.0, complex(0, 3)])
+            >>> indep_vector = np.array([1, 2, 3])
+            >>> dep_vector = np.array([4.0, -5.0, complex(0, 3)])
             >>> obj = peng.Waveform(indep_vector, dep_vector, 'obj')
             >>> print(abs(obj))
             Waveform: abs(obj)
@@ -309,7 +304,7 @@ class Waveform(object):
         """
         obj = copy.copy(self)
         obj.dep_name = "abs({0})".format(obj.dep_name)
-        obj.dep_vector = numpy.abs(obj.dep_vector).astype(obj.dep_vector.dtype)
+        obj.dep_vector = np.abs(obj.dep_vector).astype(obj.dep_vector.dtype)
         return obj
 
     def __add__(self, other):
@@ -318,10 +313,11 @@ class Waveform(object):
 
         For example:
 
-            >>> import numpy, peng
-            >>> indep_vector = numpy.array([1, 2, 3])
-            >>> dep_vector_a = numpy.array([4, 5, 6])
-            >>> dep_vector_b = numpy.array([8, 2, 4])
+            >>> import numpy as np
+            >>> import peng
+            >>> indep_vector = np.array([1, 2, 3])
+            >>> dep_vector_a = np.array([4, 5, 6])
+            >>> dep_vector_b = np.array([8, 2, 4])
             >>> obj_a = peng.Waveform(indep_vector, dep_vector_a, 'obj_a')
             >>> obj_b = peng.Waveform(indep_vector, dep_vector_b, 'obj_b')
             >>> print(obj_a+obj_b)
@@ -356,10 +352,11 @@ class Waveform(object):
 
         For example:
 
-            >>> import numpy, peng
-            >>> indep_vector = numpy.array([1, 2, 3])
-            >>> dep_vector_a = numpy.array([4, 5, 6])
-            >>> dep_vector_b = numpy.array([8, 2, 4])
+            >>> import numpy as np
+            >>> import peng
+            >>> indep_vector = np.array([1, 2, 3])
+            >>> dep_vector_a = np.array([4, 5, 6])
+            >>> dep_vector_b = np.array([8, 2, 4])
             >>> obj_a = peng.Waveform(indep_vector, dep_vector_a, 'obj_a')
             >>> obj_b = peng.Waveform(indep_vector, dep_vector_b, 'obj_b')
             >>> print(obj_a&obj_b)
@@ -395,16 +392,17 @@ class Waveform(object):
 
         For example:
 
-            >>> import numpy, peng
-            >>> indep_vector = numpy.array([1, 2, 3])
-            >>> dep_vector = numpy.array([4, 5, 6])
+            >>> import numpy as np
+            >>> import peng
+            >>> indep_vector = np.array([1, 2, 3])
+            >>> dep_vector = np.array([4, 5, 6])
             >>> obj = peng.Waveform(indep_vector, dep_vector, 'obj_a')
             >>> if obj:
             ...     print('Boolean test returned: True')
             ... else:
             ...     print('Boolean test returned: False')
             Boolean test returned: True
-            >>> dep_vector = numpy.zeros(3)
+            >>> dep_vector = np.zeros(3)
             >>> obj = peng.Waveform(indep_vector, dep_vector, 'obj_a')
             >>> if obj:
             ...     print('Boolean test returned: True')
@@ -413,12 +411,9 @@ class Waveform(object):
             Boolean test returned: False
         """
         return not bool(
-            numpy.all(
-                numpy.isclose(
-                    self._dep_vector,
-                    numpy.zeros(len(self._dep_vector)),
-                    FP_RTOL,
-                    FP_ATOL,
+            np.all(
+                np.isclose(
+                    self._dep_vector, np.zeros(len(self._dep_vector)), FP_RTOL, FP_ATOL
                 )
             )
         )
@@ -445,19 +440,19 @@ class Waveform(object):
         tchk = any([isinstance(item[1], typ) for typ in [int, float, complex]])
         if not tchk:
             return False
-        indices = [numpy.where(self._indep_vector >= item[0])[0][0]]
+        indices = [np.where(self._indep_vector >= item[0])[0][0]]
         if indices[0]:
             indices.append(indices[0] - 1)
         for index in indices:
-            icmp = numpy.isclose(
-                numpy.array([self._indep_vector[index]]),
-                numpy.array([item[0]]),
+            icmp = np.isclose(
+                np.array([self._indep_vector[index]]),
+                np.array([item[0]]),
                 FP_RTOL,
                 FP_ATOL,
             )
-            dcmp = numpy.isclose(
-                numpy.array([self._dep_vector[index]]),
-                numpy.array([item[1]]),
+            dcmp = np.isclose(
+                np.array([self._dep_vector[index]]),
+                np.array([item[1]]),
                 FP_RTOL,
                 FP_ATOL,
             )
@@ -471,9 +466,10 @@ class Waveform(object):
 
         For example:
 
-            >>> import numpy, peng
-            >>> indep_vector = numpy.array([1, 2, 3])
-            >>> dep_vector = numpy.array([4, 5, 6])
+            >>> import numpy as np
+            >>> import peng
+            >>> indep_vector = np.array([1, 2, 3])
+            >>> dep_vector = np.array([4, 5, 6])
             >>> obj_a = peng.Waveform(indep_vector, dep_vector, 'obj_a')
             >>> obj_b = copy.copy(obj_a)
             >>> obj_a == obj_b
@@ -482,8 +478,8 @@ class Waveform(object):
             False
         """
         return Waveform(
-            indep_vector=numpy.copy(self.indep_vector),
-            dep_vector=numpy.copy(self.dep_vector),
+            indep_vector=np.copy(self.indep_vector),
+            dep_vector=np.copy(self.dep_vector),
             dep_name=copy.copy(self.dep_name),
             indep_scale=self.indep_scale,
             dep_scale=self.dep_scale,
@@ -502,8 +498,8 @@ class Waveform(object):
         :raises: Same exceptions as an invalid Numpy array slicing operation
         """
         try:
-            self._indep_vector = numpy.delete(self._indep_vector, key)
-            self._dep_vector = numpy.delete(self._dep_vector, key)
+            self._indep_vector = np.delete(self._indep_vector, key)
+            self._dep_vector = np.delete(self._dep_vector, key)
         except:
             raise
         if not self._indep_vector.size:
@@ -520,10 +516,11 @@ class Waveform(object):
 
         For example:
 
-            >>> import numpy, peng
-            >>> indep_vector = numpy.array([1, 2, 3])
-            >>> dep_vector_a = numpy.array([4, 5, 6])
-            >>> dep_vector_b = numpy.array([8.0, 2.0, 4.0])
+            >>> import numpy as np
+            >>> import peng
+            >>> indep_vector = np.array([1, 2, 3])
+            >>> dep_vector_a = np.array([4, 5, 6])
+            >>> dep_vector_b = np.array([8.0, 2.0, 4.0])
             >>> obj_a = peng.Waveform(indep_vector, dep_vector_a, 'obj_a')
             >>> obj_b = peng.Waveform(indep_vector, dep_vector_b, 'obj_b')
             >>> print(obj_a/obj_b)
@@ -564,9 +561,10 @@ class Waveform(object):
 
         For example:
 
-            >>> import numpy, peng
-            >>> indep_vector = numpy.array([1, 2, 3])
-            >>> dep_vector = numpy.array([4, 5, 6])
+            >>> import numpy as np
+            >>> import peng
+            >>> indep_vector = np.array([1, 2, 3])
+            >>> dep_vector = np.array([4, 5, 6])
             >>> obj_a = peng.Waveform(indep_vector, dep_vector, 'obj_a')
             >>> obj_b = peng.Waveform(indep_vector, dep_vector, 'obj_b')
             >>> obj_a == obj_b
@@ -584,9 +582,10 @@ class Waveform(object):
         variable vector is equal to that number for all of its elements. For
         example:
 
-            >>> import numpy, peng
-            >>> indep_vector = numpy.array([1, 2, 3])
-            >>> dep_vector = 12.5*numpy.ones(len(indep_vector))
+            >>> import numpy as np
+            >>> import peng
+            >>> indep_vector = np.array([1, 2, 3])
+            >>> dep_vector = 12.5*np.ones(len(indep_vector))
             >>> obj = peng.Waveform(indep_vector, dep_vector, 'obj_a')
             >>> 5 == obj
             False
@@ -598,10 +597,10 @@ class Waveform(object):
             or (isinstance(other, int) and (not isinstance(other, bool)))
             or isinstance(other, complex)
         ):
-            return numpy.all(
-                numpy.isclose(
+            return np.all(
+                np.isclose(
                     self._dep_vector,
-                    other * numpy.ones(len(self._dep_vector)),
+                    other * np.ones(len(self._dep_vector)),
                     FP_RTOL,
                     FP_ATOL,
                 )
@@ -618,7 +617,7 @@ class Waveform(object):
         except:
             raise
         ctuple = (
-            numpy.all(numpy.isclose(dep_vector_a, dep_vector_b, FP_RTOL, FP_ATOL)),
+            np.all(np.isclose(dep_vector_a, dep_vector_b, FP_RTOL, FP_ATOL)),
             bool(self.indep_scale == other.indep_scale),
             bool(self.dep_scale == other.dep_scale),
             bool(self.indep_units == other.indep_units),
@@ -638,10 +637,11 @@ class Waveform(object):
 
         For example:
 
-            >>> import numpy, peng
-            >>> indep_vector = numpy.array([1, 2, 3])
-            >>> dep_vector_a = numpy.array([4, 5, 6])
-            >>> dep_vector_b = numpy.array([8, 2, 4])
+            >>> import numpy as np
+            >>> import peng
+            >>> indep_vector = np.array([1, 2, 3])
+            >>> dep_vector_a = np.array([4, 5, 6])
+            >>> dep_vector_b = np.array([8, 2, 4])
             >>> obj_a = peng.Waveform(indep_vector, dep_vector_a, 'obj_a')
             >>> obj_b = peng.Waveform(indep_vector, dep_vector_b, 'obj_b')
             >>> print(obj_a//obj_b)
@@ -715,7 +715,7 @@ class Waveform(object):
             dvector = self._dep_vector[key]
             return (
                 [Point(iitem, ditem) for iitem, ditem in zip(ivector, dvector)]
-                if isinstance(ivector, numpy.ndarray)
+                if isinstance(ivector, np.ndarray)
                 else Point(ivector, dvector)
             )
         except:
@@ -755,8 +755,8 @@ class Waveform(object):
         For example:
 
             >>> import math, numpy, peng
-            >>> indep_vector = numpy.array([1, 2, 3])
-            >>> dep_vector = numpy.array([6, 5, 4])
+            >>> indep_vector = np.array([1, 2, 3])
+            >>> dep_vector = np.array([6, 5, 4])
             >>> obj = peng.Waveform(indep_vector, dep_vector, 'obj')
             >>> print(~obj)
             Waveform: ~obj
@@ -783,7 +783,7 @@ class Waveform(object):
         )
         obj = copy.copy(self)
         obj.dep_name = "~" + obj.dep_name
-        obj.dep_vector = numpy.invert(obj.dep_vector).astype(obj.dep_vector.dtype)
+        obj.dep_vector = np.invert(obj.dep_vector).astype(obj.dep_vector.dtype)
         return obj
 
     def __iter__(self):
@@ -838,10 +838,11 @@ class Waveform(object):
 
         For example:
 
-            >>> import numpy, peng
-            >>> indep_vector = numpy.array([1, 2, 3])
-            >>> dep_vector_a = numpy.array([4, 5, 6])
-            >>> dep_vector_b = numpy.array([8, 2, 4])
+            >>> import numpy as np
+            >>> import peng
+            >>> indep_vector = np.array([1, 2, 3])
+            >>> dep_vector_a = np.array([4, 5, 6])
+            >>> dep_vector_b = np.array([8, 2, 4])
             >>> obj_a = peng.Waveform(indep_vector, dep_vector_a, 'obj_a')
             >>> obj_b = peng.Waveform(indep_vector, dep_vector_b, 'obj_b')
             >>> print(obj_a<<obj_b)
@@ -910,10 +911,11 @@ class Waveform(object):
 
         For example:
 
-            >>> import numpy, peng
-            >>> indep_vector = numpy.array([1, 2, 3])
-            >>> dep_vector_a = numpy.array([4, 5, 6])
-            >>> dep_vector_b = numpy.array([8, 2, 4])
+            >>> import numpy as np
+            >>> import peng
+            >>> indep_vector = np.array([1, 2, 3])
+            >>> dep_vector_a = np.array([4, 5, 6])
+            >>> dep_vector_b = np.array([8, 2, 4])
             >>> obj_a = peng.Waveform(indep_vector, dep_vector_a, 'obj_a')
             >>> obj_b = peng.Waveform(indep_vector, dep_vector_b, 'obj_b')
             >>> print(obj_a%obj_b)
@@ -952,10 +954,11 @@ class Waveform(object):
 
         For example:
 
-            >>> import numpy, peng
-            >>> indep_vector = numpy.array([1, 2, 3])
-            >>> dep_vector_a = numpy.array([4, 5, 6])
-            >>> dep_vector_b = numpy.array([8, 2, 4])
+            >>> import numpy as np
+            >>> import peng
+            >>> indep_vector = np.array([1, 2, 3])
+            >>> dep_vector_a = np.array([4, 5, 6])
+            >>> dep_vector_b = np.array([8, 2, 4])
             >>> obj_a = peng.Waveform(indep_vector, dep_vector_a, 'obj_a')
             >>> obj_b = peng.Waveform(indep_vector, dep_vector_b, 'obj_b')
             >>> print(obj_a*obj_b)
@@ -1006,9 +1009,10 @@ class Waveform(object):
 
         For example:
 
-            >>> import numpy, peng
-            >>> indep_vector = numpy.array([1, 2, 3])
-            >>> dep_vector = numpy.array([4, -5, 6])
+            >>> import numpy as np
+            >>> import peng
+            >>> indep_vector = np.array([1, 2, 3])
+            >>> dep_vector = np.array([4, -5, 6])
             >>> obj = peng.Waveform(indep_vector, dep_vector, 'obj')
             >>> print(-obj)
             Waveform: -obj
@@ -1032,16 +1036,17 @@ class Waveform(object):
 
         For example:
 
-            >>> import numpy, peng
-            >>> indep_vector = numpy.array([1, 2, 3])
-            >>> dep_vector = numpy.array([4, 5, 6])
+            >>> import numpy as np
+            >>> import peng
+            >>> indep_vector = np.array([1, 2, 3])
+            >>> dep_vector = np.array([4, 5, 6])
             >>> obj = peng.Waveform(indep_vector, dep_vector, 'obj_a')
             >>> if obj:
             ...     print('Boolean test returned: True')
             ... else:
             ...     print('Boolean test returned: False')
             Boolean test returned: True
-            >>> dep_vector = numpy.zeros(3)
+            >>> dep_vector = np.zeros(3)
             >>> obj = peng.Waveform(indep_vector, dep_vector, 'obj_a')
             >>> if obj:
             ...     print('Boolean test returned: True')
@@ -1050,12 +1055,9 @@ class Waveform(object):
             Boolean test returned: False
         """
         return not bool(
-            numpy.all(
-                numpy.isclose(
-                    self._dep_vector,
-                    numpy.zeros(len(self._dep_vector)),
-                    FP_RTOL,
-                    FP_ATOL,
+            np.all(
+                np.isclose(
+                    self._dep_vector, np.zeros(len(self._dep_vector)), FP_RTOL, FP_ATOL
                 )
             )
         )
@@ -1069,10 +1071,11 @@ class Waveform(object):
 
         For example:
 
-            >>> import numpy, peng
-            >>> indep_vector = numpy.array([1, 2, 3])
-            >>> dep_vector_a = numpy.array([4, 5, 6])
-            >>> dep_vector_b = numpy.array([8, 2, 4])
+            >>> import numpy as np
+            >>> import peng
+            >>> indep_vector = np.array([1, 2, 3])
+            >>> dep_vector_a = np.array([4, 5, 6])
+            >>> dep_vector_b = np.array([8, 2, 4])
             >>> obj_a = peng.Waveform(indep_vector, dep_vector_a, 'obj_a')
             >>> obj_b = peng.Waveform(indep_vector, dep_vector_b, 'obj_b')
             >>> print(obj_a|obj_b)
@@ -1108,9 +1111,10 @@ class Waveform(object):
 
         For example:
 
-            >>> import numpy, peng
-            >>> indep_vector = numpy.array([1, 2, 3])
-            >>> dep_vector = numpy.array([4, 5, 6])
+            >>> import numpy as np
+            >>> import peng
+            >>> indep_vector = np.array([1, 2, 3])
+            >>> dep_vector = np.array([4, 5, 6])
             >>> obj = peng.Waveform(indep_vector, dep_vector, 'obj')
             >>> print(+obj)
             Waveform: obj
@@ -1137,10 +1141,11 @@ class Waveform(object):
 
         For example:
 
-            >>> import numpy, peng
-            >>> indep_vector = numpy.array([1, 2, 3])
-            >>> dep_vector_a = numpy.array([4, 5, 6])
-            >>> dep_vector_b = numpy.array([8, 2, 4])
+            >>> import numpy as np
+            >>> import peng
+            >>> indep_vector = np.array([1, 2, 3])
+            >>> dep_vector_a = np.array([4, 5, 6])
+            >>> dep_vector_b = np.array([8, 2, 4])
             >>> obj_a = peng.Waveform(indep_vector, dep_vector_a, 'obj_a')
             >>> obj_b = peng.Waveform(indep_vector, dep_vector_b, 'obj_b')
             >>> print(obj_a**obj_b)
@@ -1201,10 +1206,11 @@ class Waveform(object):
 
         For example:
 
-            >>> import numpy, peng
+            >>> import numpy as np
+            >>> import peng
             >>> obj = peng.Waveform(
-            ...     numpy.array([1, 2, 3]),
-            ...     numpy.array([4, 5, 6]),
+            ...     np.array([1, 2, 3]),
+            ...     np.array([4, 5, 6]),
             ...     'test'
             ... )
             >>> repr(obj)
@@ -1297,10 +1303,11 @@ class Waveform(object):
 
         For example:
 
-            >>> import numpy, peng
-            >>> indep_vector = numpy.array([1, 2, 3])
-            >>> dep_vector_a = numpy.array([4, 5, 6])
-            >>> dep_vector_b = numpy.array([1, 2, 1])
+            >>> import numpy as np
+            >>> import peng
+            >>> indep_vector = np.array([1, 2, 3])
+            >>> dep_vector_a = np.array([4, 5, 6])
+            >>> dep_vector_b = np.array([1, 2, 1])
             >>> obj_a = peng.Waveform(indep_vector, dep_vector_a, 'obj_a')
             >>> obj_b = peng.Waveform(indep_vector, dep_vector_b, 'obj_b')
             >>> print(obj_a>>obj_b)
@@ -1381,13 +1388,13 @@ class Waveform(object):
         if not all([len(item) == 2 for item in value]):
             raise RuntimeError("Slice value is not valid")
         ivector, dvector = zip(*value)
-        ivector = numpy.array(ivector)
+        ivector = np.array(ivector)
         itype = ivector.dtype.name
         valid_types = ["int", "float"]
         if not any([itype.startswith(item) for item in valid_types]):
             raise RuntimeError("Slice value is not valid")
         valid_types = ["int", "float", "complex"]
-        dvector = numpy.array(dvector)
+        dvector = np.array(dvector)
         dtype = dvector.dtype.name
         if not any([dtype.startswith(item) for item in valid_types]):
             raise RuntimeError("Slice value is not valid")
@@ -1407,7 +1414,7 @@ class Waveform(object):
                 break
         nresult = max(snum, vnum)
         if nresult > snum:
-            ntype = [numpy.int, numpy.float, numpy.complex][nresult]
+            ntype = [np.int, np.float, np.complex][nresult]
             self._indep_vector = self._indep_vector.astype(ntype)
         # Dependent vector promotion
         valid_types = ["int", "float", "complex"]
@@ -1422,11 +1429,11 @@ class Waveform(object):
                 break
         nresult = max(snum, vnum)
         if nresult > snum:
-            ntype = [numpy.int, numpy.float, numpy.complex][nresult]
+            ntype = [np.int, np.float, np.complex][nresult]
             self._dep_vector = self._dep_vector.astype(ntype)
         try:
             self._indep_vector[key] = ivector if len(ivector) > 1 else ivector[0]
-            if min(numpy.diff(self._indep_vector)) <= 0:
+            if min(np.diff(self._indep_vector)) <= 0:
                 raise RuntimeError("Slice value is not valid")
             self._dep_vector[key] = dvector if len(dvector) > 1 else dvector[0]
         except:
@@ -1439,10 +1446,11 @@ class Waveform(object):
         For example:
 
             >>> from __future__ import print_function
-            >>> import numpy, peng
+            >>> import numpy as np
+            >>> import peng
             >>> obj = peng.Waveform(
-            ...     numpy.array([1, 2, 3]),
-            ...     numpy.array([4, 5, 6]),
+            ...     np.array([1, 2, 3]),
+            ...     np.array([4, 5, 6]),
             ...     'test'
             ... )
             >>> print(obj)
@@ -1488,10 +1496,11 @@ class Waveform(object):
 
         For example:
 
-            >>> import numpy, peng
-            >>> indep_vector = numpy.array([1, 2, 3])
-            >>> dep_vector_a = numpy.array([4, 5, 6])
-            >>> dep_vector_b = numpy.array([8, 2, 4])
+            >>> import numpy as np
+            >>> import peng
+            >>> indep_vector = np.array([1, 2, 3])
+            >>> dep_vector_a = np.array([4, 5, 6])
+            >>> dep_vector_b = np.array([8, 2, 4])
             >>> obj_a = peng.Waveform(indep_vector, dep_vector_a, 'obj_a')
             >>> obj_b = peng.Waveform(indep_vector, dep_vector_b, 'obj_b')
             >>> print(obj_a-obj_b)
@@ -1529,10 +1538,11 @@ class Waveform(object):
 
         For example:
 
-            >>> import numpy, peng
-            >>> indep_vector = numpy.array([1, 2, 3])
-            >>> dep_vector_a = numpy.array([4, 5, 6])
-            >>> dep_vector_b = numpy.array([8.0, 2.0, 4.0])
+            >>> import numpy as np
+            >>> import peng
+            >>> indep_vector = np.array([1, 2, 3])
+            >>> dep_vector_a = np.array([4, 5, 6])
+            >>> dep_vector_b = np.array([8.0, 2.0, 4.0])
             >>> obj_a = peng.Waveform(indep_vector, dep_vector_a, 'obj_a')
             >>> obj_b = peng.Waveform(indep_vector, dep_vector_b, 'obj_b')
             >>> print(obj_a/obj_b)
@@ -1562,10 +1572,11 @@ class Waveform(object):
 
         For example:
 
-            >>> import numpy, peng
-            >>> indep_vector = numpy.array([1, 2, 3])
-            >>> dep_vector_a = numpy.array([4, 5, 6])
-            >>> dep_vector_b = numpy.array([8, 2, 4])
+            >>> import numpy as np
+            >>> import peng
+            >>> indep_vector = np.array([1, 2, 3])
+            >>> dep_vector_a = np.array([4, 5, 6])
+            >>> dep_vector_b = np.array([8, 2, 4])
             >>> obj_a = peng.Waveform(indep_vector, dep_vector_a, 'obj_a')
             >>> obj_b = peng.Waveform(indep_vector, dep_vector_b, 'obj_b')
             >>> print(obj_a^obj_b)
@@ -1615,7 +1626,7 @@ class Waveform(object):
         ):
             scalar = True
             scalar_value = other
-            dep_vector = other * (numpy.ones(len(self._dep_vector)).astype("int"))
+            dep_vector = other * (np.ones(len(self._dep_vector)).astype("int"))
             other = Waveform(
                 indep_vector=self._indep_vector,
                 dep_vector=dep_vector,
@@ -1646,21 +1657,21 @@ class Waveform(object):
         if operand == "<":
             return (dep_vector_a < dep_vector_b).all()
         if operand == "<=":
-            ne_test = numpy.isclose(dep_vector_a, dep_vector_b, FP_RTOL, FP_ATOL)
+            ne_test = np.isclose(dep_vector_a, dep_vector_b, FP_RTOL, FP_ATOL)
             comp_test = dep_vector_a < dep_vector_b
-            return numpy.logical_or(ne_test, comp_test).all()
+            return np.logical_or(ne_test, comp_test).all()
         if operand == ">":
             return (dep_vector_a > dep_vector_b).all()
         if operand == ">=":
-            ne_test = numpy.isclose(dep_vector_a, dep_vector_b, FP_RTOL, FP_ATOL)
+            ne_test = np.isclose(dep_vector_a, dep_vector_b, FP_RTOL, FP_ATOL)
             comp_test = dep_vector_a > dep_vector_b
-            return numpy.logical_or(ne_test, comp_test).all()
+            return np.logical_or(ne_test, comp_test).all()
         if operand == "+":
             dep_vector = dep_vector_a + dep_vector_b
         elif operand == "-":
             dep_vector = dep_vector_a - dep_vector_b
         elif operand == "*":
-            dep_vector = numpy.multiply(dep_vector_a, dep_vector_b)
+            dep_vector = np.multiply(dep_vector_a, dep_vector_b)
             if proc_units and (not scalar):
                 dep_units = "({0})*({1})".format(
                     self._dep_units if not ureflected else other._dep_units,
@@ -1669,13 +1680,13 @@ class Waveform(object):
             elif proc_units:
                 dep_units = self._dep_units if self._dep_units else other._dep_units
         elif operand == "fdiv":
-            dep_vector = numpy.floor_divide(
+            dep_vector = np.floor_divide(
                 dep_vector_a if not reflected else dep_vector_b,
                 dep_vector_b if not reflected else dep_vector_a,
             )
             operand = "//"
         elif operand == "%":
-            dep_vector = numpy.mod(
+            dep_vector = np.mod(
                 dep_vector_a if not reflected else dep_vector_b,
                 dep_vector_b if not reflected else dep_vector_a,
             )
@@ -1688,7 +1699,7 @@ class Waveform(object):
             base_is_int = base.dtype.name.startswith("int")
             exp_is_int = exp.dtype.name.startswith("int")
             exint(base_is_int and exp_is_int and any(exp < 0))
-            dep_vector = numpy.power(base, exp)
+            dep_vector = np.power(base, exp)
             if proc_units and scalar and (not ureflected):
                 dep_units = "({0})**({1})".format(
                     self._dep_units, scalar_value if scalar_value else other._dep_name
@@ -1703,32 +1714,32 @@ class Waveform(object):
                     other._dep_units if not ureflected else self._dep_units,
                 )
         elif operand == "/":
-            dep_vector = numpy.divide(
+            dep_vector = np.divide(
                 dep_vector_a if not reflected else dep_vector_b,
                 dep_vector_b if not reflected else dep_vector_a,
             )
         elif operand == "<<":
-            dep_vector = numpy.left_shift(
+            dep_vector = np.left_shift(
                 dep_vector_a if not reflected else dep_vector_b,
                 dep_vector_b if not reflected else dep_vector_a,
             )
         elif operand == ">>":
-            dep_vector = numpy.right_shift(
+            dep_vector = np.right_shift(
                 dep_vector_a if not reflected else dep_vector_b,
                 dep_vector_b if not reflected else dep_vector_a,
             )
         elif operand == "&":
-            dep_vector = numpy.bitwise_and(
+            dep_vector = np.bitwise_and(
                 dep_vector_a if not reflected else dep_vector_b,
                 dep_vector_b if not reflected else dep_vector_a,
             )
         elif operand == "|":
-            dep_vector = numpy.bitwise_or(
+            dep_vector = np.bitwise_or(
                 dep_vector_a if not reflected else dep_vector_b,
                 dep_vector_b if not reflected else dep_vector_a,
             )
         else:  # elif operand == '^':
-            dep_vector = numpy.bitwise_xor(
+            dep_vector = np.bitwise_xor(
                 dep_vector_a if not reflected else dep_vector_b,
                 dep_vector_b if not reflected else dep_vector_a,
             )

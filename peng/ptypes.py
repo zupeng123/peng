@@ -10,7 +10,7 @@ import warnings
 # PyPI imports
 with warnings.catch_warnings():
     warnings.filterwarnings("ignore", category=RuntimeWarning)
-    import numpy
+    import numpy as np
 import pexdoc.pcontracts
 
 
@@ -43,21 +43,20 @@ _SUFFIX_TUPLE = (
 ###
 def _check_increasing_real_numpy_vector(obj):
     # pylint: disable=C0103
-    if isinstance(obj, numpy.ndarray) and (len(obj.shape) == 1) and (obj.shape[0] > 0):
+    if isinstance(obj, np.ndarray) and (len(obj.shape) == 1) and (obj.shape[0] > 0):
         otype = obj.dtype.name
         result = any([otype.startswith(item) for item in ("int", "float")])
         return not (
             bool(result)
             and (
-                (obj.shape[0] == 1)
-                or ((obj.shape[0] > 1) and (min(numpy.diff(obj)) > 0))
+                (obj.shape[0] == 1) or ((obj.shape[0] > 1) and (min(np.diff(obj)) > 0))
             )
         )
     return True
 
 
 def _check_number_numpy_vector(obj):
-    if isinstance(obj, numpy.ndarray) and (len(obj.shape) == 1) and (obj.shape[0] > 0):
+    if isinstance(obj, np.ndarray) and (len(obj.shape) == 1) and (obj.shape[0] > 0):
         otype = obj.dtype.name
         result = any([otype.startswith(item) for item in ("int", "float", "complex")])
         return not bool(result)
@@ -65,7 +64,7 @@ def _check_number_numpy_vector(obj):
 
 
 def _check_real_numpy_vector(obj):
-    if isinstance(obj, numpy.ndarray) and (len(obj.shape) == 1) and (obj.shape[0] > 0):
+    if isinstance(obj, np.ndarray) and (len(obj.shape) == 1) and (obj.shape[0] > 0):
         otype = obj.dtype.name
         result = any([otype.startswith(item) for item in ("int", "float")])
         return not bool(result)
@@ -194,7 +193,7 @@ def touchstone_data(obj):
         raise ValueError(pexdoc.pcontracts.get_exdesc())
     if _check_increasing_real_numpy_vector(obj["freq"]):
         raise ValueError(pexdoc.pcontracts.get_exdesc())
-    if not isinstance(obj["pars"], numpy.ndarray):
+    if not isinstance(obj["pars"], np.ndarray):
         raise ValueError(pexdoc.pcontracts.get_exdesc())
     vdata = ["int", "float", "complex"]
     if not any([obj["pars"].dtype.name.startswith(item) for item in vdata]):
@@ -236,10 +235,10 @@ def touchstone_noise_data(obj):
     if _check_number_numpy_vector(obj["rc"]):
         raise ValueError(pexdoc.pcontracts.get_exdesc())
     if not (
-        isinstance(obj["res"], numpy.ndarray)
+        isinstance(obj["res"], np.ndarray)
         and (len(obj["res"].shape) == 1)
         and (obj["res"].shape[0] > 0)
-        and numpy.all(obj["res"] >= 0)
+        and np.all(obj["res"] >= 0)
     ):
         raise ValueError(pexdoc.pcontracts.get_exdesc())
     sizes = [obj["freq"].size, obj["nf"].size, obj["rc"].size, obj["res"].size]
@@ -341,7 +340,7 @@ def wave_vectors(obj):
     if any([not (isinstance(item, tuple) and len(item) == 2) for item in obj]):
         raise ValueError(exdesc)
     indep_vector, dep_vector = zip(*obj)
-    if _check_increasing_real_numpy_vector(numpy.array(indep_vector)):
+    if _check_increasing_real_numpy_vector(np.array(indep_vector)):
         raise ValueError(exdesc)
-    if _check_real_numpy_vector(numpy.array(dep_vector)):
+    if _check_real_numpy_vector(np.array(dep_vector)):
         raise ValueError(exdesc)

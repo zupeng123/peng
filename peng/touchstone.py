@@ -24,7 +24,7 @@ import warnings
 # PyPI imports
 with warnings.catch_warnings():
     warnings.filterwarnings("ignore", category=RuntimeWarning)
-    import numpy
+    import numpy as np
 import pexdoc.exh
 import pexdoc.pcontracts
 from pexdoc.ptypes import file_name, file_name_exists
@@ -42,8 +42,8 @@ def _chunk_noise(noise):
     data = zip(
         noise["freq"],
         noise["nf"],
-        numpy.abs(noise["rc"]),
-        numpy.angle(noise["rc"]),
+        np.abs(noise["rc"]),
+        np.angle(noise["rc"]),
         noise["res"],
     )
     for freq, nf, rcmag, rcangle, res in data:
@@ -60,18 +60,18 @@ def _chunk_pars(freq_vector, data_matrix, pformat):
             fpoint = [freq] if not index else [None]
             cdata = data[index : index + length]
             if pformat == "MA":
-                vector1 = numpy.abs(cdata)
-                vector2 = numpy.rad2deg(numpy.angle(cdata))
+                vector1 = np.abs(cdata)
+                vector2 = np.rad2deg(np.angle(cdata))
             elif pformat == "RI":
-                vector1 = numpy.real(cdata)
-                vector2 = numpy.imag(cdata)
+                vector1 = np.real(cdata)
+                vector2 = np.imag(cdata)
             else:  # elif pformat == 'DB':
-                vector1 = 20.0 * numpy.log10(numpy.abs(cdata))
-                vector2 = numpy.rad2deg(numpy.angle(cdata))
-            sep_data = numpy.array([])
+                vector1 = 20.0 * np.log10(np.abs(cdata))
+                vector2 = np.rad2deg(np.angle(cdata))
+            sep_data = np.array([])
             for item1, item2 in zip(vector1, vector2):
-                sep_data = numpy.concatenate((sep_data, numpy.array([item1, item2])))
-            ret = numpy.concatenate((numpy.array(fpoint), sep_data))
+                sep_data = np.concatenate((sep_data, np.array([item1, item2])))
+            ret = np.concatenate((np.array(fpoint), sep_data))
             yield ret
 
 
@@ -168,7 +168,7 @@ def read_touchstone(fname):
     format_opts = ["DB", "MA", "RI"]
     opts = dict(units=None, ptype=None, pformat=None, z0=None)
     data = []
-    with open(fname, 'r') as fobj:
+    with open(fname, "r") as fobj:
         for num, line in enumerate(fobj):
             line = line.strip().upper()
             # Comment line
@@ -214,9 +214,9 @@ def read_touchstone(fname):
                 tokens = [float(item) for item in line.split()]
                 data.append(tokens)
             except:
-                exline(True, edata={'field':'lineno', 'value':num+1})
-    data = numpy.concatenate(data)
-    exnodata(not data.size, edata={'field':'fname', 'value':fname})
+                exline(True, edata={"field": "lineno", "value": num + 1})
+    data = np.concatenate(data)
+    exnodata(not data.size, edata={"field": "fname", "value": fname})
     # Set option defaults
     opts["units"] = opts["units"] or "GHz"
     opts["ptype"] = opts["ptype"] or "S"
@@ -227,11 +227,11 @@ def read_touchstone(fname):
     nums_per_freq = 1 + (2 * (nports ** 2))
     fslice = slice(0, data.size, nums_per_freq)
     freq = data[fslice]
-    ndiff = numpy.diff(freq)
+    ndiff = np.diff(freq)
     ndict = {}
     if (nports == 2) and ndiff.size and (min(ndiff) <= 0):
         # Extract noise data
-        npoints = numpy.where(ndiff <= 0)[0][0] + 1
+        npoints = np.where(ndiff <= 0)[0][0] + 1
         freq = freq[:npoints]
         ndata = data[9 * npoints :]
         nfpoints = int(ndata.size / 5.0)
@@ -240,7 +240,7 @@ def read_touchstone(fname):
         ndiff = 1
         nfslice = slice(0, ndata.size, 5)
         nfreq = ndata[nfslice]
-        ndiff = numpy.diff(nfreq)
+        ndiff = np.diff(nfreq)
         exnfreq(bool(ndiff.size and (min(ndiff) <= 0)))
         nfig_slice = slice(1, ndata.size, 5)
         rlmag_slice = slice(2, ndata.size, 5)
@@ -248,7 +248,7 @@ def read_touchstone(fname):
         res_slice = slice(4, ndata.size, 5)
         ndict["freq"] = scale_dict[opts["units"].upper()] * nfreq
         ndict["nf"] = ndata[nfig_slice]
-        ndict["rc"] = ndata[rlmag_slice] * numpy.exp(1j * ndata[rlphase_slice])
+        ndict["rc"] = ndata[rlmag_slice] * np.exp(1j * ndata[rlphase_slice])
         ndict["res"] = ndata[res_slice]
         ndict["points"] = nfpoints
     exdata(data.size % nums_per_freq != 0)
@@ -257,18 +257,16 @@ def read_touchstone(fname):
     data_dict["freq"] = scale_dict[opts["units"].upper()] * freq
     d1slice = slice(0, data.size, 2)
     d2slice = slice(1, data.size, 2)
-    data = numpy.delete(data, fslice)
+    data = np.delete(data, fslice)
     # For format that has angle information, the angle is given in degrees
     if opts["pformat"] == "MA":
-        data = data[d1slice] * numpy.exp(1j * numpy.deg2rad(data[d2slice]))
+        data = data[d1slice] * np.exp(1j * np.deg2rad(data[d2slice]))
     elif opts["pformat"] == "RI":
         data = data[d1slice] + (1j * data[d2slice])
     else:  # if opts['pformat'] == 'DB':
-        data = (10 ** (data[d1slice] / 20.0)) * numpy.exp(
-            1j * numpy.deg2rad(data[d2slice])
-        )
+        data = (10 ** (data[d1slice] / 20.0)) * np.exp(1j * np.deg2rad(data[d2slice]))
     if nports > 1:
-        data_dict["pars"] = numpy.resize(data, (npoints, nports, nports))
+        data_dict["pars"] = np.resize(data, (npoints, nports, nports))
     else:
         data_dict["pars"] = copy.copy(data)
     del data
@@ -276,7 +274,7 @@ def read_touchstone(fname):
     if nports == 2:
         # The order of data for a two-port file is N11, N21, N12, N22 but for
         # m ports where m > 2, the order is N11, N12, N13, ..., N1m
-        data_dict["pars"] = numpy.transpose(data_dict["pars"], (0, 2, 1))
+        data_dict["pars"] = np.transpose(data_dict["pars"], (0, 2, 1))
     return dict(nports=nports, opts=opts, data=data_dict, noise=ndict)
 
 
@@ -363,9 +361,9 @@ def write_touchstone(fname, options, data, noise=None, frac_length=10, exp_lengt
     expoints(data["points"] * nums_per_freq != data["pars"].size)
     #
     npoints = data["points"]
-    par_data = numpy.resize(numpy.copy(data["pars"]), (npoints, nports, nports))
+    par_data = np.resize(np.copy(data["pars"]), (npoints, nports, nports))
     if nports == 2:
-        par_data = numpy.transpose(par_data, (0, 2, 1))
+        par_data = np.transpose(par_data, (0, 2, 1))
     units_dict = {"ghz": "GHz", "mhz": "MHz", "khz": "KHz", "hz": "Hz"}
     options["units"] = units_dict[options["units"].lower()]
     fspace = 2 + frac_length + (exp_length + 2)

@@ -21,7 +21,7 @@ from .functions import (
     remove_extra_delims,
     round_mantissa,
     to_scientific_string,
-    to_scientific_tuple
+    to_scientific_tuple,
 )
 from .touchstone import read_touchstone, write_touchstone
 from .wave_core import Point, Waveform
@@ -74,6 +74,6 @@ from .wave_functions import (
     wcomplex,
     wfloat,
     wint,
-    wvalue
+    wvalue,
 )
 from .constants import FP_ATOL, FP_RTOL

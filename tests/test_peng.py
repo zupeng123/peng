@@ -31,14 +31,14 @@ from .touchstone import (
     test_read_touchstone,
     test_read_touchstone_exceptions,
     test_write_touchstone,
-    test_write_touchstone_exceptions
+    test_write_touchstone_exceptions,
 )
 from .wave_core import (
     test_get_indep_vector,
     test_get_indep_vector_exceptions,
     test_homogenize_waves,
     test_interp_dep_vector,
-    TestWaveform
+    TestWaveform,
 )
 from .wave_functions import (
     test_acos,

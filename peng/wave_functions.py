@@ -26,7 +26,7 @@ import warnings
 # PyPI imports
 with warnings.catch_warnings():
     warnings.filterwarnings("ignore", category=RuntimeWarning)
-    import numpy
+    import numpy as np
 import pexdoc.exh
 import pexdoc.pcontracts
 
@@ -40,10 +40,8 @@ from .wave_core import _interp_dep_vector, Waveform
 # Functions
 ###
 def _barange(bmin, bmax, inc):
-    vector = numpy.arange(bmin, bmax + inc, inc)
-    vector = (
-        vector if numpy.isclose(bmax, vector[-1], FP_RTOL, FP_ATOL) else vector[:-1]
-    )
+    vector = np.arange(bmin, bmax + inc, inc)
+    vector = vector if np.isclose(bmax, vector[-1], FP_RTOL, FP_ATOL) else vector[:-1]
     return vector
 
 
@@ -55,12 +53,12 @@ def _bound_waveform(wave, indep_min, indep_max):
         isinstance(indep_min, float) or isinstance(indep_max, float)
     ) and indep_vector.dtype.name.startswith("int"):
         indep_vector = indep_vector.astype(float)
-    min_pos = numpy.searchsorted(indep_vector, indep_min)
-    if not numpy.isclose(indep_min, indep_vector[min_pos], FP_RTOL, FP_ATOL):
-        indep_vector = numpy.insert(indep_vector, min_pos, indep_min)
-    max_pos = numpy.searchsorted(indep_vector, indep_max)
-    if not numpy.isclose(indep_max, indep_vector[max_pos], FP_RTOL, FP_ATOL):
-        indep_vector = numpy.insert(indep_vector, max_pos, indep_max)
+    min_pos = np.searchsorted(indep_vector, indep_min)
+    if not np.isclose(indep_min, indep_vector[min_pos], FP_RTOL, FP_ATOL):
+        indep_vector = np.insert(indep_vector, min_pos, indep_min)
+    max_pos = np.searchsorted(indep_vector, indep_max)
+    if not np.isclose(indep_max, indep_vector[max_pos], FP_RTOL, FP_ATOL):
+        indep_vector = np.insert(indep_vector, max_pos, indep_max)
     dep_vector = _interp_dep_vector(wave, indep_vector)
     wave._indep_vector = indep_vector[min_pos : max_pos + 1]
     wave._dep_vector = dep_vector[min_pos : max_pos + 1]
@@ -92,14 +90,12 @@ def _operation(wave, desc, units, fpointer):
 
 def _running_area(indep_vector, dep_vector):
     """Calculate running area under curve."""
-    rect_height = numpy.minimum(dep_vector[:-1], dep_vector[1:])
-    rect_base = numpy.diff(indep_vector)
-    rect_area = numpy.multiply(rect_height, rect_base)
-    triang_height = numpy.abs(numpy.diff(dep_vector))
-    triang_area = 0.5 * numpy.multiply(triang_height, rect_base)
-    return numpy.cumsum(
-        numpy.concatenate((numpy.array([0.0]), triang_area + rect_area))
-    )
+    rect_height = np.minimum(dep_vector[:-1], dep_vector[1:])
+    rect_base = np.diff(indep_vector)
+    rect_area = np.multiply(rect_height, rect_base)
+    triang_height = np.abs(np.diff(dep_vector))
+    triang_area = 0.5 * np.multiply(triang_height, rect_base)
+    return np.cumsum(np.concatenate((np.array([0.0]), triang_area + rect_area)))
 
 
 def _validate_min_max(wave, indep_min, indep_max):
@@ -122,13 +118,13 @@ def _validate_min_max(wave, indep_min, indep_max):
     exmin(
         bool(
             (indep_min < wave._indep_vector[0])
-            and (not numpy.isclose(indep_min, wave._indep_vector[0], FP_RTOL, FP_ATOL))
+            and (not np.isclose(indep_min, wave._indep_vector[0], FP_RTOL, FP_ATOL))
         )
     )
     exmax(
         bool(
             (indep_max > wave._indep_vector[-1])
-            and (not numpy.isclose(indep_max, wave._indep_vector[-1], FP_RTOL, FP_ATOL))
+            and (not np.isclose(indep_max, wave._indep_vector[-1], FP_RTOL, FP_ATOL))
         )
     )
     return indep_min, indep_max
@@ -160,7 +156,7 @@ def acos(wave):
         "Math domain error",
         bool((min(wave._dep_vector) < -1) or (max(wave._dep_vector) > 1)),
     )
-    return _operation(wave, "acos", "rad", numpy.arccos)
+    return _operation(wave, "acos", "rad", np.arccos)
 
 
 @pexdoc.pcontracts.contract(wave=Waveform)
@@ -185,7 +181,7 @@ def acosh(wave):
     .. [[[end]]]
     """
     pexdoc.exh.addex(ValueError, "Math domain error", bool(min(wave._dep_vector) < 1))
-    return _operation(wave, "acosh", "", numpy.arccosh)
+    return _operation(wave, "acosh", "", np.arccosh)
 
 
 @pexdoc.pcontracts.contract(wave=Waveform)
@@ -214,7 +210,7 @@ def asin(wave):
         "Math domain error",
         bool((min(wave._dep_vector) < -1) or (max(wave._dep_vector) > 1)),
     )
-    return _operation(wave, "asin", "rad", numpy.arcsin)
+    return _operation(wave, "asin", "rad", np.arcsin)
 
 
 @pexdoc.pcontracts.contract(wave=Waveform)
@@ -235,7 +231,7 @@ def asinh(wave):
 
     .. [[[end]]]
     """
-    return _operation(wave, "asinh", "", numpy.arcsinh)
+    return _operation(wave, "asinh", "", np.arcsinh)
 
 
 @pexdoc.pcontracts.contract(wave=Waveform)
@@ -256,7 +252,7 @@ def atan(wave):
 
     .. [[[end]]]
     """
-    return _operation(wave, "atan", "rad", numpy.arctan)
+    return _operation(wave, "atan", "rad", np.arctan)
 
 
 @pexdoc.pcontracts.contract(wave=Waveform)
@@ -285,7 +281,7 @@ def atanh(wave):
         "Math domain error",
         bool((min(wave._dep_vector) < -1) or (max(wave._dep_vector) > 1)),
     )
-    return _operation(wave, "atanh", "", numpy.arctanh)
+    return _operation(wave, "atanh", "", np.arctanh)
 
 
 @pexdoc.pcontracts.contract(
@@ -328,7 +324,7 @@ def average(wave, indep_min=None, indep_max=None):
     area[0] = ret._dep_vector[0]
     deltas = ret._indep_vector - ret._indep_vector[0]
     deltas[0] = 1.0
-    ret._dep_vector = numpy.divide(area, deltas)
+    ret._dep_vector = np.divide(area, deltas)
     ret.dep_name = "average({0})".format(ret._dep_name)
     return ret
 
@@ -351,7 +347,7 @@ def ceil(wave):
 
     .. [[[end]]]
     """
-    return _operation(wave, "ceil", wave.dep_units, numpy.ceil)
+    return _operation(wave, "ceil", wave.dep_units, np.ceil)
 
 
 @pexdoc.pcontracts.contract(wave=Waveform)
@@ -371,7 +367,7 @@ def cos(wave):
 
     .. [[[end]]]
     """
-    return _operation(wave, "cos", "", numpy.cos)
+    return _operation(wave, "cos", "", np.cos)
 
 
 @pexdoc.pcontracts.contract(wave=Waveform)
@@ -392,7 +388,7 @@ def cosh(wave):
 
     .. [[[end]]]
     """
-    return _operation(wave, "cosh", "", numpy.cosh)
+    return _operation(wave, "cosh", "", np.cosh)
 
 
 @pexdoc.pcontracts.contract(wave=Waveform)
@@ -416,14 +412,12 @@ def db(wave):
     .. [[[end]]]
     """
     pexdoc.exh.addex(
-        ValueError,
-        "Math domain error",
-        bool((numpy.min(numpy.abs(wave._dep_vector)) <= 0)),
+        ValueError, "Math domain error", bool((np.min(np.abs(wave._dep_vector)) <= 0))
     )
     ret = copy.copy(wave)
     ret.dep_units = "dB"
     ret.dep_name = "db({0})".format(ret.dep_name)
-    ret._dep_vector = 20.0 * numpy.log10(numpy.abs(ret._dep_vector))
+    ret._dep_vector = 20.0 * np.log10(np.abs(ret._dep_vector))
     return ret
 
 
@@ -467,11 +461,11 @@ def derivative(wave, indep_min=None, indep_max=None):
     """
     ret = copy.copy(wave)
     _bound_waveform(ret, indep_min, indep_max)
-    delta_indep = numpy.diff(ret._indep_vector)
-    delta_dep = numpy.diff(ret._dep_vector)
-    delta_indep = numpy.concatenate((numpy.array([delta_indep[0]]), delta_indep))
-    delta_dep = numpy.concatenate((numpy.array([delta_dep[0]]), delta_dep))
-    ret._dep_vector = numpy.divide(delta_dep, delta_indep)
+    delta_indep = np.diff(ret._indep_vector)
+    delta_dep = np.diff(ret._dep_vector)
+    delta_indep = np.concatenate((np.array([delta_indep[0]]), delta_indep))
+    delta_dep = np.concatenate((np.array([delta_dep[0]]), delta_dep))
+    ret._dep_vector = np.divide(delta_dep, delta_indep)
     ret.dep_name = "derivative({0})".format(ret._dep_name)
     ret.dep_units = _build_units(ret.indep_units, ret.dep_units, "/")
     return ret
@@ -494,7 +488,7 @@ def exp(wave):
 
     .. [[[end]]]
     """
-    return _operation(wave, "exp", "", numpy.exp)
+    return _operation(wave, "exp", "", np.exp)
 
 
 @pexdoc.pcontracts.contract(
@@ -549,14 +543,14 @@ def fft(wave, npoints=None, indep_min=None, indep_max=None):
     npoints = npoints or ret._indep_vector.size
     fs = (npoints - 1) / float(ret._indep_vector[-1])
     spoints = min(ret._indep_vector.size, npoints)
-    sdiff = numpy.diff(ret._indep_vector[:spoints])
-    cond = not numpy.all(
-        numpy.isclose(sdiff, sdiff[0] * numpy.ones(spoints - 1), FP_RTOL, FP_ATOL)
+    sdiff = np.diff(ret._indep_vector[:spoints])
+    cond = not np.all(
+        np.isclose(sdiff, sdiff[0] * np.ones(spoints - 1), FP_RTOL, FP_ATOL)
     )
     pexdoc.addex(RuntimeError, "Non-uniform sampling", cond)
     finc = fs / float(npoints - 1)
     indep_vector = _barange(-fs / 2.0, +fs / 2.0, finc)
-    dep_vector = numpy.fft.fft(ret._dep_vector, npoints)
+    dep_vector = np.fft.fft(ret._dep_vector, npoints)
     return Waveform(
         indep_vector=indep_vector,
         dep_vector=dep_vector,
@@ -912,36 +906,32 @@ def find(wave, dep_var, der=None, inst=1, indep_min=None, indep_max=None):
     # pylint: disable=C0325,R0914,W0613
     ret = copy.copy(wave)
     _bound_waveform(ret, indep_min, indep_max)
-    close_min = numpy.isclose(min(ret._dep_vector), dep_var, FP_RTOL, FP_ATOL)
-    close_max = numpy.isclose(max(ret._dep_vector), dep_var, FP_RTOL, FP_ATOL)
-    if ((numpy.amin(ret._dep_vector) > dep_var) and (not close_min)) or (
-        (numpy.amax(ret._dep_vector) < dep_var) and (not close_max)
+    close_min = np.isclose(min(ret._dep_vector), dep_var, FP_RTOL, FP_ATOL)
+    close_max = np.isclose(max(ret._dep_vector), dep_var, FP_RTOL, FP_ATOL)
+    if ((np.amin(ret._dep_vector) > dep_var) and (not close_min)) or (
+        (np.amax(ret._dep_vector) < dep_var) and (not close_max)
     ):
         return None
     cross_wave = ret._dep_vector - dep_var
-    sign_wave = numpy.sign(cross_wave)
-    exact_idx = numpy.where(numpy.isclose(ret._dep_vector, dep_var, FP_RTOL, FP_ATOL))[
-        0
-    ]
+    sign_wave = np.sign(cross_wave)
+    exact_idx = np.where(np.isclose(ret._dep_vector, dep_var, FP_RTOL, FP_ATOL))[0]
     # Locations where dep_vector crosses dep_var or it is equal to it
-    left_idx = numpy.where(numpy.diff(sign_wave))[0]
+    left_idx = np.where(np.diff(sign_wave))[0]
     # Remove elements to the left of exact matches
-    left_idx = numpy.setdiff1d(left_idx, exact_idx)
-    left_idx = numpy.setdiff1d(left_idx, exact_idx - 1)
-    right_idx = left_idx + 1 if left_idx.size else numpy.array([])
-    indep_var = ret._indep_vector[exact_idx] if exact_idx.size else numpy.array([])
-    dvector = (
-        numpy.zeros(exact_idx.size).astype(int) if exact_idx.size else numpy.array([])
-    )
+    left_idx = np.setdiff1d(left_idx, exact_idx)
+    left_idx = np.setdiff1d(left_idx, exact_idx - 1)
+    right_idx = left_idx + 1 if left_idx.size else np.array([])
+    indep_var = ret._indep_vector[exact_idx] if exact_idx.size else np.array([])
+    dvector = np.zeros(exact_idx.size).astype(int) if exact_idx.size else np.array([])
     if left_idx.size and (ret.interp == "STAIRCASE"):
         idvector = (
             2.0 * (ret._dep_vector[right_idx] > ret._dep_vector[left_idx]).astype(int)
             - 1
         )
         if indep_var.size:
-            indep_var = numpy.concatenate((indep_var, ret._indep_vector[right_idx]))
-            dvector = numpy.concatenate((dvector, idvector))
-            sidx = numpy.argsort(indep_var)
+            indep_var = np.concatenate((indep_var, ret._indep_vector[right_idx]))
+            dvector = np.concatenate((dvector, idvector))
+            sidx = np.argsort(indep_var)
             indep_var = indep_var[sidx]
             dvector = dvector[sidx]
         else:
@@ -955,18 +945,18 @@ def find(wave, dep_var, der=None, inst=1, indep_min=None, indep_max=None):
         slope = ((y_left - y_right) / (x_left - x_right)).astype(float)
         # y = y0+slope*(x-x0) => x0+(y-y0)/slope
         if indep_var.size:
-            indep_var = numpy.concatenate(
+            indep_var = np.concatenate(
                 (indep_var, x_left + ((dep_var - y_left) / slope))
             )
-            dvector = numpy.concatenate((dvector, numpy.where(slope > 0, 1, -1)))
-            sidx = numpy.argsort(indep_var)
+            dvector = np.concatenate((dvector, np.where(slope > 0, 1, -1)))
+            sidx = np.argsort(indep_var)
             indep_var = indep_var[sidx]
             dvector = dvector[sidx]
         else:
             indep_var = x_left + ((dep_var - y_left) / slope)
-            dvector = numpy.where(slope > 0, +1, -1)
+            dvector = np.where(slope > 0, +1, -1)
     if der is not None:
-        indep_var = numpy.extract(dvector == der, indep_var)
+        indep_var = np.extract(dvector == der, indep_var)
     return indep_var[inst - 1] if inst <= indep_var.size else None
 
 
@@ -988,7 +978,7 @@ def floor(wave):
 
     .. [[[end]]]
     """
-    return _operation(wave, "floor", wave.dep_units, numpy.floor)
+    return _operation(wave, "floor", wave.dep_units, np.floor)
 
 
 @pexdoc.pcontracts.contract(
@@ -1043,17 +1033,15 @@ def ifft(wave, npoints=None, indep_min=None, indep_max=None):
     _bound_waveform(ret, indep_min, indep_max)
     npoints = npoints or ret._indep_vector.size
     spoints = min(ret._indep_vector.size, npoints)
-    sdiff = numpy.diff(ret._indep_vector[:spoints])
+    sdiff = np.diff(ret._indep_vector[:spoints])
     finc = sdiff[0]
-    cond = not numpy.all(
-        numpy.isclose(sdiff, finc * numpy.ones(spoints - 1), FP_RTOL, FP_ATOL)
-    )
+    cond = not np.all(np.isclose(sdiff, finc * np.ones(spoints - 1), FP_RTOL, FP_ATOL))
     pexdoc.addex(RuntimeError, "Non-uniform frequency spacing", cond)
     fs = (npoints - 1) * finc
     tinc = 1 / float(fs)
     tend = 1 / float(finc)
     indep_vector = _barange(0, tend, tinc)
-    dep_vector = numpy.fft.ifft(ret._dep_vector, npoints)
+    dep_vector = np.fft.ifft(ret._dep_vector, npoints)
     return Waveform(
         indep_vector=indep_vector,
         dep_vector=dep_vector,
@@ -1354,7 +1342,7 @@ def imag(wave):
 
     .. [[[end]]]
     """
-    return _operation(wave, "imag", wave.dep_units, numpy.imag)
+    return _operation(wave, "imag", wave.dep_units, np.imag)
 
 
 @pexdoc.pcontracts.contract(
@@ -1449,7 +1437,7 @@ def log(wave):
     pexdoc.exh.addex(
         ValueError, "Math domain error", bool((min(wave._dep_vector) <= 0))
     )
-    return _operation(wave, "log", "", numpy.log)
+    return _operation(wave, "log", "", np.log)
 
 
 @pexdoc.pcontracts.contract(wave=Waveform)
@@ -1476,7 +1464,7 @@ def log10(wave):
     pexdoc.exh.addex(
         ValueError, "Math domain error", bool((min(wave._dep_vector) <= 0))
     )
-    return _operation(wave, "log10", "", numpy.log10)
+    return _operation(wave, "log10", "", np.log10)
 
 
 @pexdoc.pcontracts.contract(
@@ -1516,7 +1504,7 @@ def naverage(wave, indep_min=None, indep_max=None):
     ret = copy.copy(wave)
     _bound_waveform(ret, indep_min, indep_max)
     delta_x = ret._indep_vector[-1] - ret._indep_vector[0]
-    return numpy.trapz(ret._dep_vector, x=ret._indep_vector) / delta_x
+    return np.trapz(ret._dep_vector, x=ret._indep_vector) / delta_x
 
 
 @pexdoc.pcontracts.contract(
@@ -1558,7 +1546,7 @@ def nintegral(wave, indep_min=None, indep_max=None):
     """
     ret = copy.copy(wave)
     _bound_waveform(ret, indep_min, indep_max)
-    return numpy.trapz(ret._dep_vector, ret._indep_vector)
+    return np.trapz(ret._dep_vector, ret._indep_vector)
 
 
 @pexdoc.pcontracts.contract(
@@ -1597,7 +1585,7 @@ def nmax(wave, indep_min=None, indep_max=None):
     """
     ret = copy.copy(wave)
     _bound_waveform(ret, indep_min, indep_max)
-    return numpy.max(ret._dep_vector)
+    return np.max(ret._dep_vector)
 
 
 @pexdoc.pcontracts.contract(
@@ -1636,7 +1624,7 @@ def nmin(wave, indep_min=None, indep_max=None):
     """
     ret = copy.copy(wave)
     _bound_waveform(ret, indep_min, indep_max)
-    return numpy.min(ret._dep_vector)
+    return np.min(ret._dep_vector)
 
 
 @pexdoc.pcontracts.contract(wave=Waveform, unwrap=bool, rad=bool)
@@ -1674,12 +1662,10 @@ def phase(wave, unwrap=True, rad=True):
     ret.dep_units = "rad" if rad else "deg"
     ret.dep_name = "phase({0})".format(ret.dep_name)
     ret._dep_vector = (
-        numpy.unwrap(numpy.angle(ret._dep_vector))
-        if unwrap
-        else numpy.angle(ret._dep_vector)
+        np.unwrap(np.angle(ret._dep_vector)) if unwrap else np.angle(ret._dep_vector)
     )
     if not rad:
-        ret._dep_vector = numpy.rad2deg(ret._dep_vector)
+        ret._dep_vector = np.rad2deg(ret._dep_vector)
     return ret
 
 
@@ -1701,7 +1687,7 @@ def real(wave):
 
     .. [[[end]]]
     """
-    return _operation(wave, "real", wave.dep_units, numpy.real)
+    return _operation(wave, "real", wave.dep_units, np.real)
 
 
 @pexdoc.pcontracts.contract(wave=Waveform, decimals="int,>=0")
@@ -1736,7 +1722,7 @@ def round(wave, decimals=0):
     )
     ret = copy.copy(wave)
     ret.dep_name = "round({0}, {1})".format(ret.dep_name, decimals)
-    ret._dep_vector = numpy.round(wave._dep_vector, decimals)
+    ret._dep_vector = np.round(wave._dep_vector, decimals)
     return ret
 
 
@@ -1757,7 +1743,7 @@ def sin(wave):
 
     .. [[[end]]]
     """
-    return _operation(wave, "sin", "", numpy.sin)
+    return _operation(wave, "sin", "", np.sin)
 
 
 @pexdoc.pcontracts.contract(wave=Waveform)
@@ -1778,7 +1764,7 @@ def sinh(wave):
 
     .. [[[end]]]
     """
-    return _operation(wave, "sinh", "", numpy.sinh)
+    return _operation(wave, "sinh", "", np.sinh)
 
 
 @pexdoc.pcontracts.contract(wave=Waveform)
@@ -1800,7 +1786,7 @@ def sqrt(wave):
     .. [[[end]]]
     """
     dep_units = "{0}**0.5".format(wave.dep_units)
-    return _operation(wave, "sqrt", dep_units, numpy.sqrt)
+    return _operation(wave, "sqrt", dep_units, np.sqrt)
 
 
 @pexdoc.pcontracts.contract(
@@ -1891,7 +1877,7 @@ def tan(wave):
 
     .. [[[end]]]
     """
-    return _operation(wave, "tan", "", numpy.tan)
+    return _operation(wave, "tan", "", np.tan)
 
 
 @pexdoc.pcontracts.contract(wave=Waveform)
@@ -1912,7 +1898,7 @@ def tanh(wave):
 
     .. [[[end]]]
     """
-    return _operation(wave, "tanh", "", numpy.tanh)
+    return _operation(wave, "tanh", "", np.tanh)
 
 
 @pexdoc.pcontracts.contract(wave=Waveform)
@@ -1934,7 +1920,7 @@ def wcomplex(wave):
     .. [[[end]]]
     """
     ret = copy.copy(wave)
-    ret._dep_vector = ret._dep_vector.astype(numpy.complex)
+    ret._dep_vector = ret._dep_vector.astype(np.complex)
     return ret
 
 
@@ -1965,7 +1951,7 @@ def wfloat(wave):
         wave._dep_vector.dtype.name.startswith("complex"),
     )
     ret = copy.copy(wave)
-    ret._dep_vector = ret._dep_vector.astype(numpy.float)
+    ret._dep_vector = ret._dep_vector.astype(np.float)
     return ret
 
 
@@ -1996,7 +1982,7 @@ def wint(wave):
         wave._dep_vector.dtype.name.startswith("complex"),
     )
     ret = copy.copy(wave)
-    ret._dep_vector = ret._dep_vector.astype(numpy.int)
+    ret._dep_vector = ret._dep_vector.astype(np.int)
     return ret
 
 
@@ -2031,8 +2017,8 @@ def wvalue(wave, indep_var):
 
     .. [[[end]]]
     """
-    close_min = numpy.isclose(indep_var, wave._indep_vector[0], FP_RTOL, FP_ATOL)
-    close_max = numpy.isclose(indep_var, wave._indep_vector[-1], FP_RTOL, FP_ATOL)
+    close_min = np.isclose(indep_var, wave._indep_vector[0], FP_RTOL, FP_ATOL)
+    close_max = np.isclose(indep_var, wave._indep_vector[-1], FP_RTOL, FP_ATOL)
     pexdoc.exh.addex(
         ValueError,
         "Argument `indep_var` is not in the independent variable vector range",
@@ -2045,7 +2031,7 @@ def wvalue(wave, indep_var):
         return wave._dep_vector[0]
     if close_max:
         return wave._dep_vector[-1]
-    idx = numpy.searchsorted(wave._indep_vector, indep_var)
+    idx = np.searchsorted(wave._indep_vector, indep_var)
     xdelta = wave._indep_vector[idx] - wave._indep_vector[idx - 1]
     ydelta = wave._dep_vector[idx] - wave._dep_vector[idx - 1]
     slope = ydelta / float(xdelta)

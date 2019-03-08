@@ -37,7 +37,7 @@ import warnings
 # PyPI imports
 with warnings.catch_warnings():
     warnings.filterwarnings("ignore", category=RuntimeWarning)
-    import numpy
+    import numpy as np
 import pexdoc.exh
 from pexdoc.ptypes import non_negative_integer
 import pyparsing
@@ -788,9 +788,9 @@ def round_mantissa(arg, decimals=0):
     """
     if arg is None:
         return arg
-    if isinstance(arg, numpy.ndarray):
+    if isinstance(arg, np.ndarray):
         foi = [isinstance(item, int) for item in arg]
-        return numpy.array(
+        return np.array(
             [
                 item if isint else float(to_scientific_string(item, decimals))
                 for isint, item in zip(foi, arg)
@@ -1088,11 +1088,11 @@ def to_scientific_string(number, frac_length=None, exp_length=None, sign_always=
     """
     # pylint: disable=W0702
     try:
-        number = -1e20 if numpy.isneginf(number) else number
+        number = -1e20 if np.isneginf(number) else number
     except:
         pass
     try:
-        number = +1e20 if numpy.isposinf(number) else number
+        number = +1e20 if np.isposinf(number) else number
     except:
         pass
     exp_length = 0 if not exp_length else exp_length

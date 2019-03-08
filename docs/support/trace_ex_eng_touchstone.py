@@ -7,18 +7,15 @@ import docs.support.trace_support
 
 
 def trace_module(no_print=True):
-    """ Trace eng touchstone module exceptions """
-    mname = 'touchstone'
-    fname = 'peng'
-    module_prefix = 'peng.{0}.'.format(mname)
-    callable_names = (
-        'read_touchstone',
-        'write_touchstone',
-    )
+    """Trace eng touchstone module exceptions."""
+    mname = "touchstone"
+    fname = "peng"
+    module_prefix = "peng.{0}.".format(mname)
+    callable_names = ("read_touchstone", "write_touchstone")
     return docs.support.trace_support.run_trace(
-        mname, fname, module_prefix, callable_names, no_print,
+        mname, fname, module_prefix, callable_names, no_print
     )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     trace_module(False)
