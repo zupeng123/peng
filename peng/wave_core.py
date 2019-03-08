@@ -1194,7 +1194,8 @@ class Waveform(object):
         """
         return self._operation(other, "/", reflected=True)
 
-    def __repr__(self):  # noqa: D207
+    def __repr__(self):
+        # pylint: disable=C0301
         r"""
         Return a string with the expression needed to re-create the object.
 
@@ -1207,15 +1208,7 @@ class Waveform(object):
             ...     'test'
             ... )
             >>> repr(obj)
-            "peng.Waveform(\
-indep_vector=array([1, 2, 3]), \
-dep_vector=array([4, 5, 6]), \
-dep_name='test', \
-indep_scale='LINEAR', \
-dep_scale='LINEAR', \
-indep_units='', \
-dep_units='', \
-interp='CONTINUOUS')"
+            "peng.Waveform(indep_vector=array([1, 2, 3]), dep_vector=array([4, 5, 6]), dep_name='test', indep_scale='LINEAR', dep_scale='LINEAR', indep_units='', dep_units='', interp='CONTINUOUS')"
         """
         template = (
             "peng.Waveform("
