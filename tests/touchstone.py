@@ -1,7 +1,7 @@
 # touchstone.py
-# Copyright (c) 2013-2017 Pablo Acosta-Serafini
+# Copyright (c) 2013-2019 Pablo Acosta-Serafini
 # See LICENSE for details
-# pylint: disable=C0103,C0111,C0411,E1101,R0903,W0611,W0702
+# pylint: disable=C0103,C0111,C0411,E1101,R0205,R0903,R1719,W0611,W0702
 
 # Standard library imports
 import itertools
@@ -11,9 +11,13 @@ import os
 import platform
 import random
 import uuid
+import warnings
 # PyPI imports
 import numpy
-import pytest
+with warnings.catch_warnings():
+    from _pytest.warning_types import PytestWarning
+    warnings.filterwarnings("ignore", category=PytestWarning)
+    import pytest
 from pmisc import AE, AI
 # Intra-package imports
 import peng
@@ -131,8 +135,7 @@ class TmpFile(object):
             os.remove(self._fname)
         except:
             pass
-        if exc_type is not None:
-            return False
+        return False if exc_type is not None else True
 
 
 class WriteTmpFile(object):
@@ -154,8 +157,7 @@ class WriteTmpFile(object):
             os.remove(self._fname)
         except:
             pass
-        if exc_type is not None:
-            return False
+        return False if exc_type is not None else True
 
 
 ###

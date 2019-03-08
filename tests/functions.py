@@ -1,13 +1,17 @@
 # functions.py
-# Copyright (c) 2013-2017 Pablo Acosta-Serafini
+# Copyright (c) 2013-2019 Pablo Acosta-Serafini
 # See LICENSE for details
 # pylint: disable=C0103,C0111,C0302,E0611,R0913,R0915,W0108,W0212
 
 # Standard library imports
 import functools
 import sys
+import warnings
 # PyPI imports
-import pytest
+with warnings.catch_warnings():
+    from _pytest.warning_types import PytestWarning
+    warnings.filterwarnings("ignore", category=PytestWarning)
+    import pytest
 from numpy import array, inf, ndarray
 from pmisc import AE, AI, CS
 # Intra-package imports
@@ -1027,8 +1031,8 @@ CVECTOR = [-1+2j, 3+4j, 5+6j, 7+8j, 9-10j, 11+12j, -13+14j, 15678-16j]
                 ]
             ),
             DFLT,
-            '[ -0.100816750273-0.0691051714274j, '
-            '0.0187542291856+0.0171427835609j, 18j ]',
+            '[ -0.100816750273-0.069105171427j, '
+            '0.018754229186+0.017142783561j, 18j ]',
             ''
         ),
         (
@@ -1040,8 +1044,8 @@ CVECTOR = [-1+2j, 3+4j, 5+6j, 7+8j, 9-10j, 11+12j, -13+14j, 15678-16j]
                 ]
             ),
             dict(width=60, limit=True, indent=20),
-            'Dependent variable: [ -0.100816750273-0.0691051714274j,\n'
-            '                      0.0187542291856+0.0171427835609j, 18j ]',
+            'Dependent variable: [ -0.100816750273-0.069105171427j,\n'
+            '                      0.018754229186+0.017142783561j, 18j ]',
             'Dependent variable: '
         ),
         (
@@ -1057,8 +1061,8 @@ CVECTOR = [-1+2j, 3+4j, 5+6j, 7+8j, 9-10j, 11+12j, -13+14j, 15678-16j]
                 ]
             ),
             dict(width=60),
-            '[ -0.100816750273-0.0691051714274j,\n'
-            '  0.0187542291856+0.0171427835609j, 18j,\n'
+            '[ -0.100816750273-0.069105171427j,\n'
+            '  0.018754229186+0.017142783561j, 18j,\n'
             '  0.118754229186+0.117142783561j,\n'
             '  0.218754229186+0.217142783561j, 28j, 10+2j ]',
             ''
@@ -1076,10 +1080,10 @@ CVECTOR = [-1+2j, 3+4j, 5+6j, 7+8j, 9-10j, 11+12j, -13+14j, 15678-16j]
                 ]
             ),
             dict(width=60, limit=True),
-            '[ -0.100816750273-0.0691051714274j,\n'
-            '  0.0187542291856+0.0171427835609j,\n'
+            '[ -0.100816750273-0.069105171427j,\n'
+            '  0.018754229186+0.017142783561j,\n'
             '  18j,\n'
-            '                 ...\n'
+            '                ...\n'
             '  0.218754229186+0.217142783561j,\n'
             '  28j,\n'
             '  10+2j ]',

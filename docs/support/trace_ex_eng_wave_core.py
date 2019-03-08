@@ -1,5 +1,5 @@
 # trace_ex_eng_wave_core.py
-# Copyright (c) 2013-2017 Pablo Acosta-Serafini
+# Copyright (c) 2013-2019 Pablo Acosta-Serafini
 # See LICENSE for details
 # pylint: disable=C0111,W0212
 
@@ -7,7 +7,7 @@ import docs.support.trace_support
 
 
 def trace_module(no_print=True):
-    """ Trace eng wave module exceptions """
+    """Trace eng wave module exceptions."""
     mname = 'wave_core'
     fname = 'peng'
     module_prefix = 'peng.{0}.Waveform.'.format(mname)

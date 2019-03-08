@@ -1,13 +1,17 @@
 # support.py
-# Copyright (c) 2013-2017 Pablo Acosta-Serafini
+# Copyright (c) 2013-2019 Pablo Acosta-Serafini
 # See LICENSE for details
-# pylint: disable=C0103,C0111,C0113,C0122,E1127,R0201,W0212
+# pylint: disable=C0103,C0111,C0113,C0122,E1127,R0201,R1710,W0212
 
 # Standard library imports
 from __future__ import print_function
+import warnings
 # PyPI imports
 import numpy
-import pytest
+with warnings.catch_warnings():
+    from _pytest.warning_types import PytestWarning
+    warnings.filterwarnings("ignore", category=PytestWarning)
+    import pytest
 # Intra-package imports
 import peng
 from peng.constants import FP_ATOL, FP_RTOL
