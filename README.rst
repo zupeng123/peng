@@ -74,6 +74,7 @@ Description
 This package provides engineering-related classes and functions, including:
 
 * A waveform class that is a first-class object:
+
     .. code-block:: python
 
         >>> import copy, numpy, peng
@@ -328,7 +329,7 @@ Contributing
 
        $ PKG_NAME=peng tox -e py27-pkg -- -n 4
        GLOB sdist-make: .../peng/setup.py
-       py27-pkg inst-nodeps: .../peng/.tox/.tmp/package/1/peng-1.0.8.zip
+       py27-pkg inst-nodeps: .../peng/.tox/.tmp/package/1/peng-1.0.9.zip
        ...
          py27-pkg: commands succeeded
          congratulations :)
@@ -363,7 +364,7 @@ Contributing
 
        $ PKG_NAME=peng tox -e py27-test -- -x test_peng.py
        GLOB sdist-make: .../peng/setup.py
-       py27-pkg inst-nodeps: .../peng/.tox/.tmp/package/1/peng-1.0.8.zip
+       py27-pkg inst-nodeps: .../peng/.tox/.tmp/package/1/peng-1.0.9.zip
        ...
          py27-pkg: commands succeeded
          congratulations :)

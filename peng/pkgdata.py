@@ -18,7 +18,8 @@ PKG_LONG_DESC = os.linesep.join(
     [
         "This package provides engineering-related classes and functions, including:",
         "",
-        "* A waveform :ref:`class <WaveformClass>` that is a first-class object:" "",
+        "* A waveform :ref:`class <WaveformClass>` that is a first-class object:",
+        "",
         "    .. code-block:: python",
         "",
         "        >>> import copy, numpy, peng",
