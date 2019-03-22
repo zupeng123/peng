@@ -1,4 +1,4 @@
-personal_ws-1.1 en 1894 utf-8
+personal_ws-1.1 en 1923 utf-8
 a4paper
 aa
 aaa
@@ -31,6 +31,7 @@ aliceblue
 aline
 alist
 allclose
+ALLSPHINXOPTS
 alphanums
 amax
 amin
@@ -140,9 +141,11 @@ bnum
 bobj
 bool
 boolean
+branchName
 btype
 buf
 BuGn
+BUILDDIR
 BuildEnvironment
 builtin
 builtins
@@ -216,6 +219,7 @@ codecs
 codelog
 cogapp
 cogging
+collectionFile
 colno
 ColorSpaceOption
 compat
@@ -338,6 +342,8 @@ DESC
 dest
 detailmenu
 dev
+devhelp
+Devhelp
 DevOps
 DEVSTAT
 df
@@ -351,6 +357,7 @@ diff
 difflib
 dimgray
 dir
+dirhtml
 dirname
 dirpath
 DIRPATH
@@ -394,6 +401,7 @@ dtype
 dvar
 dvec
 dvector
+dvipdfmx
 E1101
 E1129
 eamsg
@@ -411,6 +419,7 @@ emsg
 enablePackrat
 encodings
 encprop
+endif
 endswith
 eng
 EngineeringNotationNumber
@@ -437,6 +446,7 @@ EPS
 epub
 eq
 eqs
+er
 erec
 errno
 esc
@@ -640,6 +650,7 @@ getreprcrash
 getsourcelines
 getter
 Getter
+gettext
 ghostwhite
 ghz
 gHz
@@ -661,6 +672,7 @@ Hettinger
 hexdigits
 hexversion
 HH
+hhp
 hier
 hnf
 hookimpl
@@ -691,6 +703,7 @@ idvector
 idx
 IDX
 IEXEC
+ifeq
 ifft
 ifftdb
 iffti
@@ -736,6 +749,7 @@ init
 Init
 inline
 inlinesyntaxhighlight
+installdeps
 instantiation
 interp
 InterpolatedUnivariateSpline
@@ -794,6 +808,7 @@ ivar
 ivector
 IXUSR
 izip
+ja
 json
 JSON
 kcg
@@ -815,6 +830,8 @@ LambdaType
 lang
 lasti
 lastword
+latexpdf
+latexpdfja
 lavenderblush
 lawngreen
 lcount
@@ -908,6 +925,7 @@ macOS
 makedir
 makedirs
 Makefile
+makeinfo
 makereport
 mant
 mapleleaf
@@ -918,6 +936,7 @@ markersize
 mathjax
 matplotlib
 Matplotlib
+md
 mdict
 mdir
 mediumaquamarine
@@ -1162,6 +1181,7 @@ palegreen
 paleturquoise
 palevioletred
 papayawhip
+PAPEROPT
 papersize
 param
 Param
@@ -1187,6 +1207,7 @@ pcontracts
 pcsv
 PCSV
 pdf
+pdflatex
 pdict
 pdir
 peachpuff
@@ -1216,6 +1237,7 @@ pkgdata
 pkgdir
 pkgs
 pkl
+platex
 plist
 plottable
 plst
@@ -1261,6 +1283,7 @@ proc
 procutils
 prt
 ps
+pseudoxml
 ptrie
 PTRIE
 ptxt
@@ -1318,6 +1341,9 @@ pythonpath
 PYTHONPATH
 pyver
 pyvers
+qcollectiongenerator
+qhcp
+qthelp
 quickstart
 R0205
 R0903
@@ -1361,6 +1387,7 @@ readlink
 readme
 README
 readouterr
+readthedocs
 ReadTheDocs
 READTHEDOCS
 realnum
@@ -1542,6 +1569,7 @@ SIGINT
 SimpleClass
 simplefilter
 sindent
+singlehtml
 sinh
 sinusoid
 sitem
@@ -1571,6 +1599,7 @@ spellchecker
 SpellChecker
 sphinx
 Sphinx
+SPHINXBUILD
 sphinxcontrib
 SphinxError
 SPHINXOPTS
