@@ -292,7 +292,7 @@ jobs:
   - bash: |
       export PYTHONPATH="$("${SBIN_DIR}"/winnorm_path.py "${PYTHONPATH}")"
       if [ -f "${SBIN_DIR}"/build_docs.py ]; then
-          "${SBIN_DIR}"/build_docs.py -r -t -n "${NUM_CPUS}" -d "$("${SBIN_DIR}"//winnorm_path.py "${SOURCE_DIR}")" || exit 1
+          "${SBIN_DIR}"/build_docs.py -r -t -d "$("${SBIN_DIR}"//winnorm_path.py "${SOURCE_DIR}")" || exit 1
       fi
     displayName: Documentation rebuild test
   - task: ArchiveFiles@2
