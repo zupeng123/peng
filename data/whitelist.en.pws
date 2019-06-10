@@ -1,4 +1,4 @@
-personal_ws-1.1 en 1923 utf-8
+personal_ws-1.1 en 1936 utf-8
 a4paper
 aa
 aaa
@@ -659,6 +659,7 @@ github
 GitHub
 gitignore
 globals
+gmail
 gmap
 GnBu
 greenyellow
@@ -683,6 +684,8 @@ htaccess
 html
 htmlcov
 htmlhelp
+http
+https
 hunspell
 Huy
 hvec
@@ -809,6 +812,7 @@ ivector
 IXUSR
 izip
 ja
+jeffknupp
 json
 JSON
 kcg
@@ -1132,6 +1136,7 @@ obranch
 ocols
 oct
 odata
+oddbird
 odg
 odict
 odv
@@ -1163,6 +1168,7 @@ orangered
 ord
 OrderedDict
 orfilter
+org
 orow
 OrRd
 os
@@ -1246,6 +1252,8 @@ pluggy
 plugin
 plugins
 PLUGINS
+pmacosta
+pmasdev
 pmisc
 Pmisc
 PMISC
@@ -1275,6 +1283,7 @@ pre
 prec
 PREC
 prepended
+preso
 prev
 prf
 printf
@@ -1615,6 +1624,7 @@ srclines
 sshippable
 ssid
 ssign
+stackoverflow
 sTaiRcAsE
 STAIRcase
 starargs
@@ -1862,6 +1872,8 @@ wheader
 whitelist
 whitesmoke
 whitespace
+wiki
+wikipedia
 win32
 winnorm
 wint
@@ -1875,6 +1887,7 @@ wround
 wsindent
 wsregexp
 wvalue
+www
 xaxis
 xbb
 xbf
