@@ -5,6 +5,8 @@
 Changelog
 =========
 
+* 1.0.10 [2019-06-10]: Updated development dependencies
+
 * 1.0.9 [2019-03-22]: Documentation and dependency update
 
 * 1.0.8 [2019-03-08]: Speedup loading of large Touchstone files (Patch submitted
