@@ -1,4 +1,4 @@
-personal_ws-1.1 en 1936 utf-8
+personal_ws-1.1 en 1940 utf-8
 a4paper
 aa
 aaa
@@ -444,6 +444,7 @@ eprint
 eps
 EPS
 epub
+Epub
 eq
 eqs
 er
@@ -576,6 +577,7 @@ fn
 fname
 FNAME
 fnames
+FNAMES
 fnmatch
 fnode
 fnum
@@ -654,6 +656,7 @@ gettext
 ghostwhite
 ghz
 gHz
+GHz
 giga
 github
 GitHub
@@ -1717,6 +1720,7 @@ TestWaveform
 teto
 tex
 texinfo
+Texinfo
 textwrap
 TextWrapper
 tfuncs
