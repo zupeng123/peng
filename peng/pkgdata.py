@@ -10,7 +10,7 @@ import os
 ###
 # Global variables
 ###
-VERSION_INFO = (1, 0, 9, "final", 0)
+VERSION_INFO = (1, 0, 10, "final", 0)
 SUPPORTED_INTERPS = ["2.7", "3.5", "3.6", "3.7"]
 COPYRIGHT_START = 2013
 PKG_DESC = "This package provides engineering-related classes and functions"
@@ -112,7 +112,7 @@ PKG_LONG_DESC = os.linesep.join(
     ]
 )
 PKG_PIPELINE_ID = 6
-PKG_SUBMODULES = ["functions", "wave_core", "wave_functions", "touchstone"]
+PKG_DOC_SUBMODULES = ["functions", "wave_core", "wave_functions", "touchstone"]
 
 
 ###
