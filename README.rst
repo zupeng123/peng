@@ -228,7 +228,7 @@ Contributing
 
 5. Install the dependencies (if needed, done automatically by pip):
 
-    * `Cog`_ (2.5.1 or newer)
+    * `Cog`_ (2.5.1 or newer and older than 3.0.0)
 
     * `Coverage`_ (4.5.3 or newer)
 
@@ -329,7 +329,7 @@ Contributing
 
        $ PKG_NAME=peng tox -e py27-pkg -- -n 4
        GLOB sdist-make: .../peng/setup.py
-       py27-pkg inst-nodeps: .../peng/.tox/.tmp/package/1/peng-1.0.9.zip
+       py27-pkg inst-nodeps: .../peng/.tox/.tmp/package/1/peng-1.0.10.zip
        ...
          py27-pkg: commands succeeded
          congratulations :)
@@ -364,7 +364,7 @@ Contributing
 
        $ PKG_NAME=peng tox -e py27-test -- -x test_peng.py
        GLOB sdist-make: .../peng/setup.py
-       py27-pkg inst-nodeps: .../peng/.tox/.tmp/package/1/peng-1.0.9.zip
+       py27-pkg inst-nodeps: .../peng/.tox/.tmp/package/1/peng-1.0.10.zip
        ...
          py27-pkg: commands succeeded
          congratulations :)
