@@ -1,4 +1,4 @@
-personal_ws-1.1 en 1940 utf-8
+personal_ws-1.1 en 1942 utf-8
 a4paper
 aa
 aaa
@@ -352,6 +352,7 @@ dfilter
 DFLT
 dic
 dict
+DICT
 dicts
 diff
 difflib
@@ -657,6 +658,7 @@ ghostwhite
 ghz
 gHz
 GHz
+GHZ
 giga
 github
 GitHub
