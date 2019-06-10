@@ -34,6 +34,7 @@ from pypkg.functions import (
     get_pkg_name,
     get_pkg_desc,
     get_pkg_version,
+    get_sphinx_extensions,
 )
 
 PKG_NAME = get_pkg_name()
@@ -66,7 +67,7 @@ extensions = [
     "sphinxcontrib.inlinesyntaxhighlight",
     "sphinx.ext.doctest",
     "sphinxcontrib.shellcheck",
-]
+] + get_sphinx_extensions()
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
