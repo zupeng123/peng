@@ -49,7 +49,6 @@ Description
    er/docs/documentation.md
 .. _Docutils: http://docutils.sourceforge.net/docs
 .. _Funcsigs: https://pypi.org/project/funcsigs
-.. _Mock: https://docs.python.org/3/library/unittest.mock.html
 .. _Numpy: http://www.numpy.org
 .. _Pexdoc: http://pexdoc.readthedocs.org
 .. _Pmisc: https://pmisc.readthedocs.org
@@ -239,8 +238,6 @@ Contributing
     * `Funcsigs`_ (Python 2.x only, 1.0.2 or newer)
 
     * `Inline Syntax Highlight Sphinx Extension`_ (0.2 or newer)
-
-    * `Mock`_ (Python 2.x only, 2.0.0 or newer)
 
     * `Numpy`_ (1.16.2 or newer)
 
