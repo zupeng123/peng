@@ -78,6 +78,10 @@ pydocstyle:
 	@echo "Running Pydocstyle on package files"
 	@pydocstyle --config=$(EXTRA_DIR)/.pydocstyle $(LINT_FILES)
 
+rtd:
+	@echo "Testing ReadTheDocs configuration"
+	@READTHEDOCS=True PKG_NAME=$(PKG_NAME) tox -e rtd
+
 sdist: meta
 	@echo "Creating source distribution"
 	@cd $(PKG_DIR) && python setup.py sdist --formats=zip
