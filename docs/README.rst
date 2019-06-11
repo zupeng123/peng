@@ -623,7 +623,7 @@ Contributing
 
        $ PKG_NAME=peng tox -e py27-pkg -- -n 4
        GLOB sdist-make: .../peng/setup.py
-       py27-pkg inst-nodeps: .../peng/.tox/.tmp/package/1/peng-1.0.10.zip
+       py27-pkg inst-nodeps: .../peng/.tox/.tmp/package/1/peng-1.0.11.zip
        ...
          py27-pkg: commands succeeded
          congratulations :)
@@ -658,7 +658,7 @@ Contributing
 
        $ PKG_NAME=peng tox -e py27-test -- -x test_peng.py
        GLOB sdist-make: .../peng/setup.py
-       py27-pkg inst-nodeps: .../peng/.tox/.tmp/package/1/peng-1.0.10.zip
+       py27-pkg inst-nodeps: .../peng/.tox/.tmp/package/1/peng-1.0.11.zip
        ...
          py27-pkg: commands succeeded
          congratulations :)
