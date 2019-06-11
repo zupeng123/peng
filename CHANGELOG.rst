@@ -5,6 +5,8 @@
 Changelog
 =========
 
+* 1.0.11 [2019-06-11]: Fixed ReadTheDocs build
+
 * 1.0.10 [2019-06-10]: Updated development dependencies
 
 * 1.0.9 [2019-03-22]: Documentation and dependency update
