@@ -21,11 +21,12 @@ exobj_eng = trace_ex_eng_functions.trace_module(no_print=True)
 # Standard library imports
 import collections
 import copy
+from decimal import Decimal
+import decimal
 import math
 import re
 import textwrap
-import decimal
-from decimal import Decimal
+import os
 import sys
 
 if sys.hexversion < 0x03000000:  # pragma: no cover
@@ -35,9 +36,10 @@ else:  # pragma: no cover
 import warnings
 
 # PyPI imports
-with warnings.catch_warnings():
-    warnings.filterwarnings("ignore", category=RuntimeWarning)
-    import numpy as np
+if os.environ.get("READTHEDOCS", "") != "True":
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", category=RuntimeWarning)
+        import numpy as np
 import pexdoc.exh
 from pexdoc.ptypes import non_negative_integer
 import pyparsing

@@ -1,16 +1,18 @@
 # ptypes.py
 # Copyright (c) 2013-2019 Pablo Acosta-Serafini
 # See LICENSE for details
-# pylint: disable=C0111,R0916
+# pylint: disable=C0111,C0413,R0916
 
 # Standard library imports
 import math
+import os
 import warnings
 
 # PyPI imports
-with warnings.catch_warnings():
-    warnings.filterwarnings("ignore", category=RuntimeWarning)
-    import numpy as np
+if os.environ.get("READTHEDOCS", "") != "True":
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", category=RuntimeWarning)
+        import numpy as np
 import pexdoc.pcontracts
 
 

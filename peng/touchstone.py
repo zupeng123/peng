@@ -12,7 +12,7 @@ exobj = trace_ex_eng_touchstone.trace_module(no_print=True)
 # touchstone.py
 # Copyright (c) 2013-2019 Pablo Acosta-Serafini
 # See LICENSE for details
-# pylint: disable=C0103,C0111,C0325,E1101,E1111,R0914,W0611
+# pylint: disable=C0103,C0111,C0325,C0413,E1101,E1111,R0914,W0611
 
 # Standard library imports
 import copy
@@ -22,9 +22,10 @@ import re
 import warnings
 
 # PyPI imports
-with warnings.catch_warnings():
-    warnings.filterwarnings("ignore", category=RuntimeWarning)
-    import numpy as np
+if os.environ.get("READTHEDOCS", "") != "True":
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", category=RuntimeWarning)
+        import numpy as np
 import pexdoc.exh
 import pexdoc.pcontracts
 from pexdoc.ptypes import file_name, file_name_exists

@@ -21,25 +21,26 @@ cname = (
 # wave_core.py
 # Copyright (c) 2013-2019 Pablo Acosta-Serafini
 # See LICENSE for details
-# pylint: disable=C0111,C0302,E0611,E1111,R0205,R0912,R0915,R1701,R1706
+# pylint: disable=C0111,C0302,C0413,E0611,E1111,R0205,R0912,R0915,R1701,R1706
 # pylint: disable=W0105,W0611,W0706
 
 # Standard library imports
 import collections
 import copy
+import os
 import sys
 import warnings
 
 # PyPI imports
-with warnings.catch_warnings():
-    warnings.filterwarnings("ignore", category=RuntimeWarning)
-    import numpy as np
+if os.environ.get("READTHEDOCS", "") != "True":
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", category=RuntimeWarning)
+        import numpy as np
 import pexdoc.exh
 import pexdoc.pcontracts
 from pexdoc.ptypes import non_null_string
 
-with warnings.catch_warnings():
-    warnings.filterwarnings("ignore", category=RuntimeWarning)
+if os.environ.get("READTHEDOCS", "") != "True":
     import scipy.interpolate
 # Intra-package imports imports
 from .functions import pprint_vector, remove_extra_delims

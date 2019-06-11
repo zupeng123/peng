@@ -16,17 +16,19 @@ exobj_eng = trace_ex_eng_wave_functions.trace_module(no_print=True)
 # wave_functions.py
 # Copyright (c) 2013-2019 Pablo Acosta-Serafini
 # See LICENSE for details
-# pylint: disable=C0103,C0111,E1101,E1111,R0913,W0212
+# pylint: disable=C0103,C0111,C0413,E1101,E1111,R0913,W0212
 
 # Standard library imports
 import copy
 import math
+import os
 import warnings
 
 # PyPI imports
-with warnings.catch_warnings():
-    warnings.filterwarnings("ignore", category=RuntimeWarning)
-    import numpy as np
+if os.environ.get("READTHEDOCS", "") != "True":
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", category=RuntimeWarning)
+        import numpy as np
 import pexdoc.exh
 import pexdoc.pcontracts
 
